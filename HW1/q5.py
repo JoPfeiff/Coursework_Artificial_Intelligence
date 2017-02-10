@@ -180,7 +180,7 @@ for i in range(100):
 for i in range(100):
     plt.scatter(costs[i],counts[i])
 plt.show()
-#plt.savefig("scatterplot.pdf")
+plt.savefig("scatterplot.pdf")
 
 for i in range(100):
     plt.scatter(costs[i],times[i])
