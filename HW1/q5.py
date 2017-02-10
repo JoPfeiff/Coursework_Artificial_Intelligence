@@ -176,6 +176,7 @@ print len(costs)
 for i in range(100):
     plt.scatter(costs[i],counts[i])
 plt.show()
+plt.savefig("scatterplot.pdf")
 
 
 
