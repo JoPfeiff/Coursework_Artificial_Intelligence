@@ -5,6 +5,7 @@ from operator import itemgetter
 from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 class Node():
 
@@ -131,6 +132,7 @@ def a_star(x1,y1,x2,y2):
 
     count=0
 
+    t = time.time()
     while bool(stack):
         stack_item = stack.pop_node()
         currenct_h_cost = stack_item[1]
@@ -153,8 +155,8 @@ def a_star(x1,y1,x2,y2):
                 child.set_cost(new_cost )
                 child.set_parent(current_node)
                 stack.add_node(child, new_cost + heuristic(child, goal, graph_size))
-
-
+    exec_time=time.time() - t
+    print 'Time to generate the route (seconds): ', exec_time
     print("Path :")
     parent = goal.get_parent()
     print(goal.get_node_name())
@@ -165,7 +167,7 @@ def a_star(x1,y1,x2,y2):
 
     print("cost = %s" %(goal.get_cost()))
     print count
-    return count, goal.get_cost() 
+    return count, goal.get_cost(), exec_time
 
 
 def add_edge(graph, vertex_a, vertex_b):
@@ -199,17 +201,23 @@ def legal_moves_from(row, col, board_size):
 
 counts=[]
 costs=[]
+times=[]
 for i in range(100):
-    x,y=a_star(np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8))
+    x,y,z=a_star(np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8))
     counts.append(x)
     costs.append(y)
-print len(counts)
-print len(costs)
+    times.append(z)
+#print len(counts)
+#print len(costs)
 
 for i in range(100):
     plt.scatter(costs[i],counts[i])
 plt.show()
 plt.savefig("scatterplot.pdf")
+
+for i in range(100):
+    plt.scatter(costs[i],times[i])
+plt.show()
 
 
 
