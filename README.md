@@ -1,0 +1,2 @@
+# ArtificialIntelligence
+UMass AI Class
