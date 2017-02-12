@@ -57,38 +57,50 @@ def initialize_graph():
     return graph , costs
 
 def heuristic(node1, node2, graph_size):
+
+    if(node1 == node2):
+        return 0
+
     node1 = node1.get_node_name()
     node2 = node2.get_node_name()
     start = node1[0] + node1[1]
     goal = node2[0] + node2[1]
-    diagonal = False
 
-    for x in range(-graph_size,graph_size):
-        if((x + node1[0] == node2[0]) & (x + node1[1] == node2[1])):
-            #print x + node1[0]
-            #print node2[0]
-            #print x + node1[1]
-            #print node2[1]
+    diagonal = False
+    for x in range(0,graph_size):
+        if(((x + node1[0] == node2[0]) |
+               (x - node1[0] == node2[0])) &
+               ((x + node1[1] == node2[1]) |
+               (x - node1[1] == node2[1]))):
             diagonal = True
             break
 
+    two_distance_square = False
+    if(((2 + node1[0] == node2[0]) | (2 - node1[0] == node2[0]))& ((2 + node1[1] == node2[1]) | (2 - node1[1] == node2[1]))):
+        two_distance_square = True
+
     color = (start & 0x1 ) ==  (goal & 0x1 )
+
     manhattan = abs(node1[0] - node2[0] ) + abs(node1[1] - node2[1] )
+
+    outside_four_box = False
+    if (((node1[0] + 4 < node1[0] | node1[0] - 4 > node1[0]) |
+                (node1[1] + 4 < node1[1] | node1[1] - 4 > node1[1]))):
+        outside_four_box = True
 
     min_distance = 1
 
-    if((not color) & (manhattan == 3)):
-        min_distance = max(1,min_distance)
-    if((not color )& (manhattan != 3)):
+    if((not color )& (not two_distance_square)):
         min_distance = max(3,min_distance)
-    if(diagonal & (manhattan % 4 == 0)):
-        min_distance = max(4,min_distance)
-    if(color & ((node1[0] + 4 < node1[0] | node1[0] - 4 > node1[0]) |
-                (node1[1] + 4 < node1[1] | node1[1] - 4 > node1[1]))) :
-        min_distance = max(4,min_distance)
-    if(color & ((node1[0] + 4 > node1[0] & node1[0] - 4 < node1[0]) &
-                (node1[1] + 4 > node1[1] & node1[1] - 4 < node1[1]))):
+    if (color): #& ((node1[0] + 4 > node1[0] & node1[0] - 4 < node1[0]) &
+             #        (node1[1] + 4 > node1[1] & node1[1] - 4 < node1[1]))):
         min_distance = max(2, min_distance)
+
+    if (diagonal & (manhattan % 4 == 0)):
+        min_distance = max(4, min_distance)
+    if(color & outside_four_box) :
+        min_distance = max(4,min_distance)
+
 
     return min_distance
 
