@@ -56,41 +56,8 @@ def initialize_graph():
               ('C', 'D'): 1 }
     return graph , costs
 
-def heuristic(node1, node2, graph_size):
-    node1 = node1.get_node_name()
-    node2 = node2.get_node_name()
-    start = node1[0] + node1[1]
-    goal = node2[0] + node2[1]
-    diagonal = False
-
-    for x in range(-graph_size,graph_size):
-        if((x + node1[0] == node2[0]) & (x + node1[1] == node2[1])):
-            #print x + node1[0]
-            #print node2[0]
-            #print x + node1[1]
-            #print node2[1]
-            diagonal = True
-            break
-
-    color = (start & 0x1 ) ==  (goal & 0x1 )
-    manhattan = abs(node1[0] - node2[0] ) + abs(node1[1] - node2[1] )
-
-    min_distance = 1
-
-    if((not color) & (manhattan == 3)):
-        min_distance = max(1,min_distance)
-    if((not color )& (manhattan != 3)):
-        min_distance = max(3,min_distance)
-    if(diagonal & (manhattan % 4 == 0)):
-        min_distance = max(4,min_distance)
-    if(color & ((node1[0] + 4 < node1[0] | node1[0] - 4 > node1[0]) |
-                (node1[1] + 4 < node1[1] | node1[1] - 4 > node1[1]))) :
-        min_distance = max(4,min_distance)
-    if(color & ((node1[0] + 4 > node1[0] & node1[0] - 4 < node1[0]) &
-                (node1[1] + 4 > node1[1] & node1[1] - 4 < node1[1]))):
-        min_distance = max(2, min_distance)
-
-    return min_distance
+def heuristic(node1, node2):
+    return 1
 
 
 
@@ -114,8 +81,8 @@ class Stack():
 def a_star(x1,y1,x2,y2):
 
     #graph, costs = initialize_graph()
-    graph_size = 8
-    graph = build_graph(graph_size)
+
+    graph = build_graph(8)
 
     nodes = {}
 
@@ -131,16 +98,16 @@ def a_star(x1,y1,x2,y2):
     start.set_cost(0)
 
     count=0
-
+    
     t = time.time()
     while bool(stack):
         stack_item = stack.pop_node()
+        currenct_h_cost = stack_item[1]
         count+=1
-        #currenct_h_cost = stack_item[1]
         current_node = stack_item[0]
         current_cost = current_node.get_cost()
 
-        print("Parent Node = %s current cost = %s heuristic = %s" %(current_node.get_node_name(), current_cost, heuristic(current_node, goal, graph_size)))
+        print("Parent Node = %s current cost = %s heuristic = %s" %(current_node.get_node_name(), current_cost, currenct_h_cost))
         if current_node == goal:
             print("found goal")
             break
@@ -151,11 +118,11 @@ def a_star(x1,y1,x2,y2):
             new_cost = current_cost + 1 #costs[sorted_nodes[0],sorted_nodes[1]]
             child = nodes[child_name]
             if(child.get_cost() > new_cost ):
-
+                
                 print("New Path from %s to %s with total cost %s" %(current_node.get_node_name(), child_name, new_cost))
                 child.set_cost(new_cost )
                 child.set_parent(current_node)
-                stack.add_node(child, new_cost + heuristic(child, goal, graph_size))
+                stack.add_node(child, new_cost + heuristic(child, goal))
     exec_time=time.time() - t
     print 'Time to generate the route (seconds): ', exec_time
     print("Path :")
@@ -219,6 +186,5 @@ plt.savefig("scatterplot.pdf")
 for i in range(100):
     plt.scatter(costs[i],times[i])
 plt.show()
-
-
+    
 
