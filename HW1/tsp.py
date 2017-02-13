@@ -22,8 +22,6 @@ def simple_generator(nr_samples):
     return points
 
 
-simple_generator(5)
-
 def distance(node1, node2):
     return (abs(node1[0] - node2[0]) **2 +   abs(node1[1] - node2[1]) **2) ** 0.5
 
@@ -157,44 +155,17 @@ def build_MST_graph(points):
 
 
 def build_TSP_Graph(points):
-     #= simple_generator(graph_size)
-
-    start_name = points[0]
-    #all_nodes = {}
-    #for point_p in points:
-
-    #    distance_dict = {}
-
-#        for point_c in points:
-#
- #           if point_c != point_p:
-#
- #               distance_dict[point_c] = distance(point_c,point_p)
-#
-  #      all_nodes[point_p] = Node(point_p,distance_dict)
-
- #   start_node = all_nodes[start_name]
-
-    #for key, value in  graph.iteritems():
 
     graph = {}
-  #  graph[str(start_node)] = {}
-    #for point in points:
-    #    if point != start_name:
-  #  combinations = []
-    #for L in range(1, len(points) + 1):
-    #for subset in itertools.combinations(points, len(points) -2 ):
-    #    print subset
+
 
     all_nodes = {}
 
     for subset in itertools.permutations(points, len(points)):
-        #name = ''
+
         tup_set = []
 
-
         for i in range(0,len(subset)):
-            #name = name + str(subset[i])
             tup_set.append(subset[i])
             missing = []
             for s in subset:
@@ -206,41 +177,25 @@ def build_TSP_Graph(points):
                 all_nodes[str(tup_set)] = Node(current_tup_set,[], current_missing)
 
 
-
-        #name = ''
         tup_set = []
         child_tup_set = []
         for i in range(0,len(subset)):
             tup_set.append(subset[i])
             if i == 0:
                 child_tup_set.append(subset[i])
-            #name = name + str(subset[i])
 
 
 
             if i < len(subset) - 1:
                 child_tup_set.append(subset[i+1])
-                #name = name + str(subset[i])
                 cost = distance(subset[i], subset[i+1])
-                #child_name = name + str(subset[i+1])
 
-                #print( str(tup_set))
-                #print(child_name)
-
-                #missing = []
-                #for s in subset:
-                #    if s not in tup_set:
-                #        missing.append(s)
                 try:
                     bool(graph[all_nodes[str(tup_set)]])
 
                 except:
                     graph[all_nodes[str(tup_set)]] = {}
-                #graph[name][str(subset[i+1])] =  (tup_set, missing , cost)
-                #child = subset[i+1]
-                #child_tup = tup_set
-                #child_tup = child_tup.append(child)
-                #current_parent = copy.copy(tup_set)
+
                 current_children = copy.copy(child_tup_set)
 
                 all_nodes[str(tup_set)].add_child(current_children)
@@ -249,19 +204,19 @@ def build_TSP_Graph(points):
             else:
                 graph[str(tup_set)] = None #(tup_set, None, 0)
 
-
+    print("TSP Graph was set")
     return graph, all_nodes
 
-points = simple_generator(5)
+#points = simple_generator(5)
 
-graph =  build_TSP_Graph(points)
-print graph
+#graph =  build_TSP_Graph(points)
+#print graph
 
 def heuristic(conn_node, start, missing_nodes):
 
     start = start.get_last_elem()
-    closest_connection = 2
-    closest_start = 2
+    closest_connection = 999999999999999999999
+    closest_start = 999999999999999999999
 
 
     for node in missing_nodes:
@@ -270,41 +225,28 @@ def heuristic(conn_node, start, missing_nodes):
         closest_connection = max(to_conn,closest_connection)
         closest_start = max(closest_start,to_start)
 
-    #points = simple_generator(5)
 
     if(missing_nodes == []):
         return closest_connection + closest_start
 
     graph = build_MST_graph(missing_nodes)
-    # print graph
-    root = missing_nodes[0]
+
     mst_cost = prim(graph, missing_nodes[0])
 
     return closest_connection + closest_start + mst_cost
 
 
 
-#build_TSP_Graph(5)
 
+def a_star(points):
 
-
-def a_star(x1, y1, x2, y2):
-    # graph, costs = initialize_graph()
-    #graph_size = 8
-    graph_size = 5
-    points = simple_generator(graph_size)
 
     graph, all_nodes = build_TSP_Graph(points)
 
-    nodes = {}
-
-    #for key, value in graph.items():
-    #    nodes[key] = Node(key, value)
 
     stack = Stack()
 
     start = all_nodes[str([points[0]])]#nodes[(x1, y1)]
-    #goal = nodes[(x2, y2)]
 
 
     stack.add_node(start, 0)
@@ -336,8 +278,8 @@ def a_star(x1, y1, x2, y2):
             child = all_nodes[str(child_name)]
             if (child.get_cost() > new_cost):
                 count += 1
-                print(
-                "New Path from %s to %s with total cost %s" % (current_node.get_node_name(), child_name, new_cost))
+                #print(
+                #"New Path from %s to %s with total cost %s" % (current_node.get_node_name(), child_name, new_cost))
                 child.set_cost(new_cost)
                 child.set_parent(current_node)
                 stack.add_node(child, new_cost + heuristic(child.get_last_elem(), start, child.get_missing()))
@@ -354,26 +296,40 @@ def a_star(x1, y1, x2, y2):
     print count
     return count, current_node.get_cost(), exec_time
 
-a_star(1,2,3,4)
+
+
+def load_points(file):
+    with open(file) as f:
+        content = f.readlines()
+    points = []
+    for line in content:
+
+        if line[0].isdigit():
+            split = line.split(" ")
+            tup = (float(split[1]), float(split[2]))
+            points.append(tup)
+    return points
+
+file = "Data/dj38.tsp.txt"
+
+points = load_points(file)
+
+#graph_size = 5
+#points = simple_generator(graph_size)
+
+
+
+a_star(points)
 
 
 
 
+#points = simple_generator(5)
 
-
-graph = {0: {1: 6, 2: 8},
-         1: {4: 11},
-         2: {3: 9},
-         3: {},
-         4: {5: 3},
-         5: {2: 7, 3: 4}}
-
-points = simple_generator(5)
-
-graph = build_MST_graph(points)
+#graph = build_MST_graph(points)
 #print graph
 
-cost = prim(graph, points[0])
+#cost = prim(graph, points[0])
 #print "cost: %s" %(cost)
 #for v in pred: print "%s: %s" % (v, pred[v])
 
