@@ -1,5 +1,13 @@
 import numpy as np
 from pythonds.graphs import PriorityQueue, Graph, Vertex
+import itertools
+import collections
+from operator import itemgetter
+from collections import defaultdict
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+import copy
 
 def simple_generator(nr_samples):
     points = [None] * nr_samples
@@ -16,179 +24,8 @@ def simple_generator(nr_samples):
 
 simple_generator(5)
 
-
-
-class Node():
-
-    parent_node = None
-    cost = 999999999999999
-
-    def __init__(self, node_name, child_node_names):
-        self.node_name = node_name
-        #self.parent_node_name = parent_node_name
-        #self.child_node_names = {}
-        self.child_node_names = child_node_names
-
-
-    #def set_shortest_distance(self,distance, path):
-
-    def set_parent(self, parent_node):
-        self.parent_node = parent_node
-
-    def set_cost(self, cost):
-        self.cost = cost
-
-    def get_parent(self):
-        return self.parent_node
-
-    def get_cost(self):
-        return  self.cost
-
-    def get_children(self):
-        return self.child_node_names
-
-    def get_node_name(self):
-        return self.node_name
-
-
-
-class Stack():
-
-    def __init__(self):
-        self.ordered_stack = [] #collections.OrderedDict(reversed = False)
-
-    def add_node(self, node, cost):
-        #self.ordered_stack[node] = cost
-        self.ordered_stack.append((node,cost))
-        self.ordered_stack =  sorted(self.ordered_stack, key=itemgetter(1))
-        #print(self.ordered_stack)
-
-    def pop_node(self):
-        return self.ordered_stack.pop(0) #popped_node = self.ordered_stack.items()[0]
-
-def build_graph(points):
-    #points = simple_generator(graph_size)
-
-    graph = {}
-
-    for point_p in points:
-
-        distance_dict = {}
-
-        for point_c in points:
-
-            if point_c != point_p:
-
-                distance_dict[point_c] = distance(point_c,point_p)
-
-        graph[Node(point_p,distance_dict)] = 0
-    return graph
-
-
-def build_TSP_Graph(graph_size):
-    points = simple_generator(graph_size)
-
-    start_name = points[0]
-    all_nodes = {}
-    for point_p in points:
-
-        distance_dict = {}
-
-        for point_c in points:
-
-            if point_c != point_p:
-
-                distance_dict[point_c] = distance(point_c,point_p)
-
-        all_nodes[point_p] = Node(point_p,distance_dict)
-
-    start_node = all_nodes[start_name]
-
-    #for key, value in  graph.iteritems():
-
-    graph = []
-    #graph[0] = start_node
-    for i in range(len(points)):
-        if points[i] != start_name:
-            graph.append(points[i])
-
-
-
-
-def a_star(x1, y1, x2, y2):
-    # graph, costs = initialize_graph()
-    graph_size = 8
-    graph = build_graph(graph_size)
-
-    nodes = {}
-
-    for key, value in graph.items():
-        nodes[key] = Node(key, value)
-
-    stack = Stack()
-
-    start = nodes[(x1, y1)]
-    goal = nodes[(x2, y2)]
-
-    stack.add_node(start, 0)
-    start.set_cost(0)
-
-    count = 0
-
-    t = time.time()
-    while bool(stack):
-        stack_item = stack.pop_node()
-        currenct_h_cost = stack_item[1]
-        current_node = stack_item[0]
-        current_cost = current_node.get_cost()
-
-        print("Parent Node = %s current cost = %s heuristic = %s" % (
-        current_node.get_node_name(), current_cost, heuristic(current_node, goal, graph_size)))
-        if current_node == goal:
-            print("found goal")
-            break
-
-        for child_name in current_node.get_children():
-
-            sorted_nodes = sorted([current_node.get_node_name(), child_name])
-            new_cost = current_cost + 1  # costs[sorted_nodes[0],sorted_nodes[1]]
-            child = nodes[child_name]
-            if (child.get_cost() > new_cost):
-                count += 1
-                print(
-                "New Path from %s to %s with total cost %s" % (current_node.get_node_name(), child_name, new_cost))
-                child.set_cost(new_cost)
-                child.set_parent(current_node)
-                stack.add_node(child, new_cost + heuristic(child, goal, graph_size))
-    exec_time = time.time() - t
-    print 'Time to generate the route (seconds): ', exec_time
-    print("Path :")
-    parent = goal.get_parent()
-    print(goal.get_node_name())
-    while (parent is not None):
-        print(parent.get_node_name())
-        parent = nodes[parent.get_node_name()].get_parent()
-
-    print("cost = %s" % (goal.get_cost()))
-    print count
-    return count, goal.get_cost(), exec_time
-
-
-def popmin(pqueue):
-    # A (ascending or min) priority queue keeps element with
-    # lowest priority on top. So pop function pops out the element with
-    # lowest value. It can be implemented as sorted or unsorted array
-    # (dictionary in this case) or as a tree (lowest priority element is
-    # root of tree)
-    lowest = 1000
-    keylowest = None
-    for key in pqueue:
-        if pqueue[key] < lowest:
-            lowest = pqueue[key]
-            keylowest = key
-    del pqueue[keylowest]
-    return keylowest
-
+def distance(node1, node2):
+    return (abs(node1[0] - node2[0]) **2 +   abs(node1[1] - node2[1]) **2) ** 0.5
 
 def prim(graph, root):
     pred = {}  # pair {vertex: predecesor in MST}
@@ -211,11 +48,317 @@ def prim(graph, root):
                 pred[v] = u
                 key[v] = graph[u][v]
                 pqueue[v] = graph[u][v]
-    return pred
+    cost = 0
+    for key, value in pred.iteritems():
+        if value != -1:
+            cost += distance(key,value)
+
+    return cost
 
 
-def distance(node1, node2):
-    return (abs(node1[0] - node2[0]) **2 +   abs(node1[1] - node2[1]) **2) ** 0.5
+def popmin(pqueue):
+    # A (ascending or min) priority queue keeps element with
+    # lowest priority on top. So pop function pops out the element with
+    # lowest value. It can be implemented as sorted or unsorted array
+    # (dictionary in this case) or as a tree (lowest priority element is
+    # root of tree)
+    lowest = 1000
+    keylowest = None
+    for key in pqueue:
+        if pqueue[key] < lowest:
+            lowest = pqueue[key]
+            keylowest = key
+    del pqueue[keylowest]
+    return keylowest
+
+
+
+class Node():
+
+    parent_node = None
+    cost = 999999999999999
+
+    def __init__(self, node_name, child_node_names, missing):
+        self.node_name = node_name
+        #self.parent_node_name = parent_node_name
+        #self.child_node_names = {}
+        self.child_node_names = child_node_names
+        self.missing = missing
+
+
+    #def set_shortest_distance(self,distance, path):
+
+    def get_missing(self):
+        return self.missing
+
+    def set_parent(self, parent_node):
+        self.parent_node = parent_node
+
+    def set_cost(self, cost):
+        self.cost = cost
+
+    def get_parent(self):
+        return self.parent_node
+
+    def get_cost(self):
+        return  self.cost
+
+    def add_child(self, child):
+        self.child_node_names.append(child)
+        return self.child_node_names
+
+    def get_children(self):
+        return self.child_node_names
+
+    def get_node_name(self):
+        return self.node_name
+
+    def get_last_elem(self):
+        return self.node_name[-1]
+
+
+
+class Stack():
+
+    def __init__(self):
+        self.ordered_stack = [] #collections.OrderedDict(reversed = False)
+
+    def add_node(self, node, cost):
+        #self.ordered_stack[node] = cost
+        self.ordered_stack.append((node,cost))
+        self.ordered_stack =  sorted(self.ordered_stack, key=itemgetter(1))
+        #print(self.ordered_stack)
+
+    def pop_node(self):
+        return self.ordered_stack.pop(0) #popped_node = self.ordered_stack.items()[0]
+
+def build_MST_graph(points):
+    #points = simple_generator(graph_size)
+
+    graph = {}
+
+    for point_p in points:
+
+        distance_dict = {}
+
+        for point_c in points:
+
+            if point_c != point_p:
+
+                try:
+                    bool(graph[point_p])
+                except:
+                    graph[point_p] ={}
+                graph[point_p][point_c] = distance(point_c,point_p)
+
+        #graph[Node(point_p,distance_dict)] = 0
+    return graph
+
+
+
+def build_TSP_Graph(points):
+     #= simple_generator(graph_size)
+
+    start_name = points[0]
+    #all_nodes = {}
+    #for point_p in points:
+
+    #    distance_dict = {}
+
+#        for point_c in points:
+#
+ #           if point_c != point_p:
+#
+ #               distance_dict[point_c] = distance(point_c,point_p)
+#
+  #      all_nodes[point_p] = Node(point_p,distance_dict)
+
+ #   start_node = all_nodes[start_name]
+
+    #for key, value in  graph.iteritems():
+
+    graph = {}
+  #  graph[str(start_node)] = {}
+    #for point in points:
+    #    if point != start_name:
+  #  combinations = []
+    #for L in range(1, len(points) + 1):
+    #for subset in itertools.combinations(points, len(points) -2 ):
+    #    print subset
+
+    all_nodes = {}
+
+    for subset in itertools.permutations(points, len(points)):
+        #name = ''
+        tup_set = []
+
+
+        for i in range(0,len(subset)):
+            #name = name + str(subset[i])
+            tup_set.append(subset[i])
+            missing = []
+            for s in subset:
+                if s not in tup_set:
+                    missing.append(s)
+            if not all_nodes.has_key(str(tup_set)) :
+                current_missing = copy.copy(missing)
+                current_tup_set = copy.copy(tup_set)
+                all_nodes[str(tup_set)] = Node(current_tup_set,[], current_missing)
+
+
+
+        #name = ''
+        tup_set = []
+        child_tup_set = []
+        for i in range(0,len(subset)):
+            tup_set.append(subset[i])
+            if i == 0:
+                child_tup_set.append(subset[i])
+            #name = name + str(subset[i])
+
+
+
+            if i < len(subset) - 1:
+                child_tup_set.append(subset[i+1])
+                #name = name + str(subset[i])
+                cost = distance(subset[i], subset[i+1])
+                #child_name = name + str(subset[i+1])
+
+                #print( str(tup_set))
+                #print(child_name)
+
+                #missing = []
+                #for s in subset:
+                #    if s not in tup_set:
+                #        missing.append(s)
+                try:
+                    bool(graph[all_nodes[str(tup_set)]])
+
+                except:
+                    graph[all_nodes[str(tup_set)]] = {}
+                #graph[name][str(subset[i+1])] =  (tup_set, missing , cost)
+                #child = subset[i+1]
+                #child_tup = tup_set
+                #child_tup = child_tup.append(child)
+                #current_parent = copy.copy(tup_set)
+                current_children = copy.copy(child_tup_set)
+
+                all_nodes[str(tup_set)].add_child(current_children)
+                child_node = all_nodes[str(child_tup_set)]
+                graph[all_nodes[str(tup_set)]][child_node] =  cost
+            else:
+                graph[str(tup_set)] = None #(tup_set, None, 0)
+
+
+    return graph, all_nodes
+
+points = simple_generator(5)
+
+graph =  build_TSP_Graph(points)
+print graph
+
+def heuristic(conn_node, start, missing_nodes):
+
+    start = start.get_last_elem()
+    closest_connection = 2
+    closest_start = 2
+
+
+    for node in missing_nodes:
+        to_start = distance(start,node)
+        to_conn = distance(node,conn_node)
+        closest_connection = max(to_conn,closest_connection)
+        closest_start = max(closest_start,to_start)
+
+    #points = simple_generator(5)
+
+    if(missing_nodes == []):
+        return closest_connection + closest_start
+
+    graph = build_MST_graph(missing_nodes)
+    # print graph
+    root = missing_nodes[0]
+    mst_cost = prim(graph, missing_nodes[0])
+
+    return closest_connection + closest_start + mst_cost
+
+
+
+#build_TSP_Graph(5)
+
+
+
+def a_star(x1, y1, x2, y2):
+    # graph, costs = initialize_graph()
+    #graph_size = 8
+    graph_size = 5
+    points = simple_generator(graph_size)
+
+    graph, all_nodes = build_TSP_Graph(points)
+
+    nodes = {}
+
+    #for key, value in graph.items():
+    #    nodes[key] = Node(key, value)
+
+    stack = Stack()
+
+    start = all_nodes[str([points[0]])]#nodes[(x1, y1)]
+    #goal = nodes[(x2, y2)]
+
+
+    stack.add_node(start, 0)
+    start.set_cost(0)
+
+    count = 0
+
+    t = time.time()
+    current_node = None
+    while bool(stack):
+        stack_item = stack.pop_node()
+        currenct_h_cost = stack_item[1]
+        current_node = stack_item[0]
+        current_cost = current_node.get_cost()
+
+        #print("Parent Node = %s current cost = %s heuristic = %s" % (
+        #current_node.get_node_name(), current_cost, heuristic(current_node, goal, graph_size)))
+        if current_node.get_children() == []:
+            print("found goal")
+            break
+
+        for child_name in current_node.get_children():
+
+            sorted_nodes = sorted([current_node.get_node_name(), child_name])
+            #test = graph[all_nodes[str(current_node[0])]]
+            child_node = all_nodes[str(child_name)]
+            test = graph[current_node][child_node]
+            new_cost = current_cost + graph[current_node][child_node]  # costs[sorted_nodes[0],sorted_nodes[1]]
+            child = all_nodes[str(child_name)]
+            if (child.get_cost() > new_cost):
+                count += 1
+                print(
+                "New Path from %s to %s with total cost %s" % (current_node.get_node_name(), child_name, new_cost))
+                child.set_cost(new_cost)
+                child.set_parent(current_node)
+                stack.add_node(child, new_cost + heuristic(child.get_last_elem(), start, child.get_missing()))
+    exec_time = time.time() - t
+    print 'Time to generate the route (seconds): ', exec_time
+    print("Path :")
+    parent = current_node.get_parent()
+    print(current_node.get_node_name())
+    while (parent is not None):
+        print(parent.get_node_name())
+        parent = parent.get_parent()
+
+    print("cost = %s" % (current_node.get_cost()))
+    print count
+    return count, current_node.get_cost(), exec_time
+
+a_star(1,2,3,4)
+
+
+
+
 
 
 graph = {0: {1: 6, 2: 8},
@@ -225,8 +368,14 @@ graph = {0: {1: 6, 2: 8},
          4: {5: 3},
          5: {2: 7, 3: 4}}
 
-pred = prim(graph, 0)
-for v in pred: print "%s: %s" % (v, pred[v])
+points = simple_generator(5)
+
+graph = build_MST_graph(points)
+#print graph
+
+cost = prim(graph, points[0])
+#print "cost: %s" %(cost)
+#for v in pred: print "%s: %s" % (v, pred[v])
 
 
 
