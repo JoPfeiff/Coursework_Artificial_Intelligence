@@ -135,8 +135,6 @@ def build_MST_graph(points):
 
     for point_p in points:
 
-        distance_dict = {}
-
         for point_c in points:
 
             if point_c != point_p:
@@ -229,7 +227,7 @@ def heuristic(conn_node, start, missing_nodes):
 
     mst_cost = prim(graph, missing_nodes[0])
 
-    return closest_connection + closest_start + (2*mst_cost)
+    return closest_connection + closest_start + (5*mst_cost)
 
 
 
@@ -255,7 +253,6 @@ def a_star(points):
     while bool(stack):
         count += 1
         stack_item = stack.pop_node()
-        currenct_h_cost = stack_item[1]
         current_node = stack_item[0]
         current_cost = current_node.get_cost()
 
@@ -267,10 +264,7 @@ def a_star(points):
 
         for child_name in current_node.get_children():
 
-            sorted_nodes = sorted([current_node.get_node_name(), child_name])
-            #test = graph[all_nodes[str(current_node[0])]]
             child_node = all_nodes[str(child_name)]
-            test = graph[current_node][child_node]
             new_cost = current_cost + graph[current_node][child_node]  # costs[sorted_nodes[0],sorted_nodes[1]]
             child = all_nodes[str(child_name)]
             if (child.get_cost() > new_cost):

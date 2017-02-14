@@ -155,7 +155,6 @@ def a_star(x1,y1,x2,y2,size):
 
         for child_name in current_node.get_children():
 
-            sorted_nodes = sorted([current_node.get_node_name(), child_name])
             new_cost = current_cost + 1 #costs[sorted_nodes[0],sorted_nodes[1]]
             child = nodes[child_name]
             if(child.get_cost() > new_cost ):
