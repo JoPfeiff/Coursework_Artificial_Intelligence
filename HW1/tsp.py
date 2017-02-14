@@ -1,5 +1,4 @@
 import numpy as np
-from pythonds.graphs import PriorityQueue, Graph, Vertex
 import itertools
 import collections
 from operator import itemgetter
@@ -119,19 +118,18 @@ class Node():
 class Stack():
 
     def __init__(self):
-        self.ordered_stack = [] #collections.OrderedDict(reversed = False)
+        self.ordered_stack = []
 
     def add_node(self, node, cost):
-        #self.ordered_stack[node] = cost
+
         self.ordered_stack.append((node,cost))
         self.ordered_stack =  sorted(self.ordered_stack, key=itemgetter(1))
-        #print(self.ordered_stack)
+       
 
     def pop_node(self):
-        return self.ordered_stack.pop(0) #popped_node = self.ordered_stack.items()[0]
+        return self.ordered_stack.pop(0) 
 
 def build_MST_graph(points):
-    #points = simple_generator(graph_size)
 
     graph = {}
 
@@ -149,7 +147,7 @@ def build_MST_graph(points):
                     graph[point_p] ={}
                 graph[point_p][point_c] = distance(point_c,point_p)
 
-        #graph[Node(point_p,distance_dict)] = 0
+        
     return graph
 
 
@@ -207,10 +205,8 @@ def build_TSP_Graph(points):
     print("TSP Graph was set")
     return graph, all_nodes
 
-#points = simple_generator(5)
 
-#graph =  build_TSP_Graph(points)
-#print graph
+
 
 def heuristic(conn_node, start, missing_nodes):
 
@@ -246,7 +242,7 @@ def a_star(points):
 
     stack = Stack()
 
-    start = all_nodes[str([points[0]])]#nodes[(x1, y1)]
+    start = all_nodes[str([points[0]])]
 
 
     stack.add_node(start, 0)
@@ -257,6 +253,7 @@ def a_star(points):
     t = time.time()
     current_node = None
     while bool(stack):
+        count += 1
         stack_item = stack.pop_node()
         currenct_h_cost = stack_item[1]
         current_node = stack_item[0]
@@ -277,9 +274,6 @@ def a_star(points):
             new_cost = current_cost + graph[current_node][child_node]  # costs[sorted_nodes[0],sorted_nodes[1]]
             child = all_nodes[str(child_name)]
             if (child.get_cost() > new_cost):
-                count += 1
-                #print(
-                #"New Path from %s to %s with total cost %s" % (current_node.get_node_name(), child_name, new_cost))
                 child.set_cost(new_cost)
                 child.set_parent(current_node)
                 stack.add_node(child, new_cost + heuristic(child.get_last_elem(), start, child.get_missing()))
@@ -295,7 +289,7 @@ def a_star(points):
         parent = parent.get_parent()
 
     print("cost = %s" % (current_node.get_cost()))
-    print count
+
     return count, current_node.get_cost(), exec_time
 
 
@@ -312,19 +306,17 @@ def load_points(file):
             points.append(tup)
     return points
 
-file = "Data/dj38.tsp.txt"
+#file = "Data/dj38.tsp.txt"
 
-points = load_points(file)
-
-graph_size = 8
-points = simple_generator(graph_size)
+#points = load_points(file)
 
 
+if __name__=="__main__":
+    counts=[]
+    costs=[]
+    times=[]
 
-a_star(points)
-
-
-
+    graph_size = 4
 
 #points = simple_generator(5)
 
@@ -335,5 +327,27 @@ a_star(points)
 #print "cost: %s" %(cost)
 #for v in pred: print "%s: %s" % (v, pred[v])
 
-
+    for i in range(1,10):
+        points = simple_generator(i)
+        x,y,z=a_star(points)
+        counts.append(x)
+        costs.append(i)
+        times.append(z)
+    
+    fig=plt.figure()
+    for i in range(1,9):
+        plt.scatter(costs[i],counts[i])
+    #plt.show()
+    plt.xlabel('No. of cities', fontsize=18)
+    plt.ylabel('Number of nodes expanded', fontsize=16)
+    fig.savefig('Nodes vs Solution Length.jpg')
+    
+    
+    fig2=plt.figure()
+    for i in range(1,9):
+        plt.scatter(costs[i],times[i])
+    #plt.show()
+    plt.xlabel('No. of cities', fontsize=18)
+    plt.ylabel('Time to completion', fontsize=16)
+    fig2.savefig('Time vs Solution Length.jpg')
 
