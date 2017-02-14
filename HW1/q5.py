@@ -19,8 +19,6 @@ class Node():
         self.child_node_names = child_node_names
 
 
-    #def set_shortest_distance(self,distance, path):
-
     def set_parent(self, parent_node):
         self.parent_node = parent_node
 
@@ -39,7 +37,7 @@ class Node():
     def get_node_name(self):
         return self.node_name
 
-
+# This function is used to initialize the state space 
 def initialize_graph():
 
     graph = { 'A': ['B','C', 'E'],
@@ -56,6 +54,7 @@ def initialize_graph():
               ('C', 'D'): 1 }
     return graph , costs
 
+#this function is called to initialise the heuristic according to the board size
 def heuristic(node1, node2, graph_size):
 
     if(node1 == node2):
@@ -92,8 +91,7 @@ def heuristic(node1, node2, graph_size):
 
     if((not color )& (not two_distance_square)):
         min_distance = max(3,min_distance)
-    if (color): #& ((node1[0] + 4 > node1[0] & node1[0] - 4 < node1[0]) &
-             #        (node1[1] + 4 > node1[1] & node1[1] - 4 < node1[1]))):
+    if (color): 
         min_distance = max(2, min_distance)
 
     if (diagonal & (manhattan % 4 == 0)):
@@ -109,23 +107,21 @@ def heuristic(node1, node2, graph_size):
 class Stack():
 
     def __init__(self):
-        self.ordered_stack = [] #collections.OrderedDict(reversed = False)
+        self.ordered_stack = [] 
 
     def add_node(self, node, cost):
-        #self.ordered_stack[node] = cost
         self.ordered_stack.append((node,cost))
         self.ordered_stack =  sorted(self.ordered_stack, key=itemgetter(1))
-        #print(self.ordered_stack)
+
 
     def pop_node(self):
-        return self.ordered_stack.pop(0) #popped_node = self.ordered_stack.items()[0]
+        return self.ordered_stack.pop(0) 
 
 
 
 
 def a_star(x1,y1,x2,y2,size):
 
-    #graph, costs = initialize_graph()
     graph_size = size
     graph = build_graph(graph_size)
 
@@ -179,7 +175,6 @@ def a_star(x1,y1,x2,y2,size):
         parent = nodes[parent.get_node_name()].get_parent()
 
     print("cost = %s" %(goal.get_cost()))
-    print count
     return count, goal.get_cost(), exec_time
 
 
@@ -199,7 +194,7 @@ def build_graph(board_size):
 
 
 
-
+## this is what gives the legal moves for the knights 
 def legal_moves_from(row, col, board_size):
     MOVE_OFFSETS = (
         (-1, -2), (1, -2),
