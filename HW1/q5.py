@@ -123,10 +123,10 @@ class Stack():
 
 
 
-def a_star(x1,y1,x2,y2):
+def a_star(x1,y1,x2,y2,size):
 
     #graph, costs = initialize_graph()
-    graph_size = 8
+    graph_size = size
     graph = build_graph(graph_size)
 
     nodes = {}
@@ -212,25 +212,39 @@ def legal_moves_from(row, col, board_size):
         if 0 <= move_row < board_size and 0 <= move_col < board_size:
             yield move_row, move_col
 
-counts=[]
-costs=[]
-times=[]
-for i in range(100):
-    x,y,z=a_star(np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8))
-    counts.append(x)
-    costs.append(y)
-    times.append(z)
-#print len(counts)
-#print len(costs)
 
-for i in range(100):
-    plt.scatter(costs[i],counts[i])
-plt.show()
-plt.savefig("scatterplot.pdf")
+if __name__=="__main__":
+    counts=[]
+    costs=[]
+    times=[]
+    
+    graph_size=8
+    for i in range(100):
+        x,y,z=a_star(np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8),np.random.randint(0,8),graph_size)
+        counts.append(x)
+        costs.append(y)
+        times.append(z)
+    #print len(counts)
+    #print len(costs)
+    
+    
+    fig=plt.figure()
+    for i in range(100):
+        plt.scatter(costs[i],counts[i])
+    #plt.show()
+    plt.xlabel('Solution length', fontsize=18)
+    plt.ylabel('Number of nodes expanded', fontsize=16)
+    fig.savefig('Nodes vs Solution Length.jpg')
+    
+    
+    fig2=plt.figure()
+    for i in range(100):
+        plt.scatter(costs[i],times[i])
+    #plt.show()
+    plt.xlabel('Solution length', fontsize=18)
+    plt.ylabel('Time to completion', fontsize=16)
+    fig2.savefig('Time vs Solution Length.jpg')
 
-for i in range(100):
-    plt.scatter(costs[i],times[i])
-plt.show()
 
 
 
