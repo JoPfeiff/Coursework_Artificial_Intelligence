@@ -60,7 +60,7 @@ def popmin(pqueue):
     # lowest value. It can be implemented as sorted or unsorted array
     # (dictionary in this case) or as a tree (lowest priority element is
     # root of tree)
-    lowest = 1000
+    lowest = 999999999999999
     keylowest = None
     for key in pqueue:
         if pqueue[key] < lowest:
@@ -240,7 +240,7 @@ def heuristic(conn_node, start, missing_nodes):
 
 def a_star(points):
 
-
+    allStart = time.time()
     graph, all_nodes = build_TSP_Graph(points)
 
 
@@ -284,6 +284,8 @@ def a_star(points):
                 child.set_parent(current_node)
                 stack.add_node(child, new_cost + heuristic(child.get_last_elem(), start, child.get_missing()))
     exec_time = time.time() - t
+    endtime = time.time() - allStart
+    print "Time for everything: %s" %(endtime)
     print 'Time to generate the route (seconds): ', exec_time
     print("Path :")
     parent = current_node.get_parent()
@@ -314,8 +316,8 @@ file = "Data/dj38.tsp.txt"
 
 points = load_points(file)
 
-#graph_size = 5
-#points = simple_generator(graph_size)
+graph_size = 8
+points = simple_generator(graph_size)
 
 
 
