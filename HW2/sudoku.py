@@ -28,38 +28,113 @@ class Sudoku:
     B = range(0,9)
     I = range(0,3)
     b = [range(0,3), range(3,6), range(6,9)]
+    D = range(1,10)
 
     def __init__(self, matrix):
         self.matrix = matrix
+        self.domain_dict = self.initialize_domain(self.matrix)
 
-        row_elem = 1
-        column_elem = 1
-        value = 8
 
-        row_test = self.constraint_row(row_elem,column_elem,value)
-        column_test = self.constraint_column(row_elem,column_elem,value)
-        square_test = self.constraint_square(row_elem,column_elem,value)
+
         print "done"
 
 
-    def constraint_row(self, row_elem, column_elem, value):
+    def initialize_domain(self, matrix):
+        domain_dict = {}
+        for i in self.B:
+            for j in self.B:
+                if matrix[i,j] != 0:
+                    domain_dict[str(i)+str(j)] = []
+                else:
+                    domain_dict[str(i)+str(j)] = self.D
+        return domain_dict
+
+
+    def update_domains(self, matrix, domain_dict):
+        for i in self.B:
+            for j in self.B:
+                #if (i == 0 and j == 4):
+                    #print "hi"
+                if matrix[i,j] == 0:
+                    # if len(domain_dict[str(i)+str(j)]) == 1:
+                    #     matrix[i,j] = domain_dict[str(i)+str(j)][0]
+                    # elif len(domain_dict[str(i) + str(j)]) == 0:
+                    #     return False
+                    #
+                    # else:
+                    new_domain = []
+                    for value in domain_dict[str(i)+str(j)]:
+                        if self.check_constrainst(i, j, value, matrix):
+                            new_domain.append(value)
+                    domain_dict[str(i) + str(j)] = new_domain
+
+        return domain_dict
+
+    def backtracking_search(self):
+
+        return self.recursive_backtracking(self.domain_dict,self.matrix)
+
+    def get_next_variable(self, matrix):
+        for i in self.B:
+            for j in self.B:
+                if matrix[i,j] == 0:
+                    return i,j
+
+    def recursive_backtracking(self, domain_dict, matrix):
+        if not 0 in matrix:
+            return matrix
+
+        # put unassigned variable here
+        domain_dict = self.update_domains(matrix, domain_dict)
+        i, j = self.get_next_variable(matrix)
+
+        print "%s%s" %(i,j)
+
+        if (i == 8) and (j == 8):
+            print "here"
+        for value in domain_dict[str(i)+str(j)]:
+            if self.check_constrainst(i,j,value,matrix):
+                new_matrix = copy.copy(matrix)
+                new_matrix[i,j] = value
+                new_domain_dict = copy.copy(domain_dict)
+                new_domain_dict[str(i)+str(j)] = []
+                new_domain_dict = self.update_domains(new_matrix,new_domain_dict)
+                if 0 not in new_matrix:
+                    return matrix
+                result =  self.recursive_backtracking(new_domain_dict,new_matrix)
+                #print result
+
+                # if result is False:
+                #     print "\n"
+                #     print matrix
+
+                if result is not False:
+                    return result
+
+        return False
+
+
+    def check_constrainst(self, row_elem, column_elem, value, matrix):
+        return (self.constraint_row(row_elem,column_elem,value, matrix) and self.constraint_column(row_elem,column_elem,value, matrix)) and self.constraint_square(row_elem, column_elem, value, matrix)
+
+    def constraint_row(self, row_elem, column_elem, value, matrix):
         for row_compare in self.B:
             if row_elem != row_compare:
-                compare_value = self.matrix[column_elem, row_compare]
-                if(self.matrix[column_elem, row_compare] == value):
+                #compare_value = matrix[column_elem, row_compare]
+                if(matrix[column_elem, row_compare] == value):
                     return False
         return True
 
 
-    def constraint_column(self, row_elem, column_elem, value):
+    def constraint_column(self, row_elem, column_elem, value, matrix):
         for column_compare in self.B:
             if column_elem != column_compare:
-                compare_value = self.matrix[column_compare, row_elem]
-                if (self.matrix[column_compare, row_elem] == value):
+                #compare_value = self.matrix[column_compare, row_elem]
+                if (matrix[column_compare, row_elem] == value):
                     return False
         return True
 
-    def constraint_square(self, row_elem, column_elem, value):
+    def constraint_square(self, row_elem, column_elem, value, matrix):
         b1 = []
         b2 = []
         for box in self.b:
@@ -71,17 +146,19 @@ class Sudoku:
         for row_compare in b1:
             for column_compare in b2:
                 if not( (row_elem == row_compare) & (column_elem == column_compare)):
-                    compare_value = self.matrix[column_compare, row_compare]
-                    if (self.matrix[column_compare, row_compare] == value):
+                    #compare_value = matrix[column_compare, row_compare]
+                    if (matrix[column_compare, row_compare] == value):
                         return False
         return True
 
 
+#file = "sudokus/puz-001_solved_missing.txt"
 file = "sudokus/puz-001.txt"
 
 matrix = read_file(file)
 
 sudoku = Sudoku(matrix)
+print sudoku.backtracking_search()
 
-print matrix
+#print matrix
 
