@@ -37,6 +37,8 @@ class Sudoku:
 
         self.depth = 0
 
+        self.guess = 0
+
         print "done"
 
 
@@ -68,14 +70,24 @@ class Sudoku:
                         if self.check_constrainst(i, j, value, matrix):
                             new_domain.append(value)
                     if new_domain == []:
-                        print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
+                        # print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
                         return False
                     domain_dict[str(i) + str(j)] = new_domain
 
         return domain_dict
 
     def backtracking_search(self):
+        ##############
+        # forward selection
+        ##################
         new_domain_dict = self.update_domains(self.matrix, self.domain_dict)
+
+        ##############
+        # NO forward selection
+        ##################
+        #new_domain_dict = self.domain_dict
+
+
         return self.recursive_backtracking(new_domain_dict,self.matrix, 0)
 
     def get_next_variable(self, matrix):
@@ -96,26 +108,35 @@ class Sudoku:
                 best = key
         return int(best[0]), int(best[1])
 
+    def get_nr_guesses(self):
+        return self.guess
+
     def recursive_backtracking(self, domain_dict, matrix, depth):
         if not 0 in matrix:
             return matrix
 
+
         #i, j = self.get_next_variable(matrix)
         i, j = self.get_best_next_variable(domain_dict)
+        self.guess += len(domain_dict[str(i) + str(j)]) - 1
         for value in domain_dict[str(i)+str(j)]:
 
-            print ("depth = %s, length = %s" ) %(depth, len(domain_dict[str(i)+str(j)]))
-            # if self.check_constrainst(i,j,value,matrix):
-            new_matrix , new_domain_dict = self.set_value(matrix, domain_dict, i,j,value)
-            #print new_matrix
-            #print ("i = %s, j= %s, value = %s \n\n") %(i,j,domain_dict[str(i)+str(j)])
-            new_domain_dict = self.update_domains(new_matrix, new_domain_dict)
-            if new_domain_dict is not False:
-                #return False
-                result =  self.recursive_backtracking(new_domain_dict,new_matrix, depth+1)
+            # print ("depth = %s, length = %s" ) %(depth, len(domain_dict[str(i)+str(j)]))
+            if self.check_constrainst(i,j,value,matrix):
+                new_matrix , new_domain_dict = self.set_value(matrix, domain_dict, i,j,value)
 
-                if result is not False:
-                    return result
+                ##############
+                # forward selection
+                ##################
+                new_domain_dict = self.update_domains(new_matrix, new_domain_dict)
+
+
+                if new_domain_dict is not False:
+                    #return False
+                    result =  self.recursive_backtracking(new_domain_dict,new_matrix, depth+1)
+
+                    if result is not False:
+                        return result
 
         return False
 
@@ -127,13 +148,20 @@ class Sudoku:
         return new_matrix, new_domain_dict
 
     def check_constrainst(self, row_elem, column_elem, value, matrix):
+        # print (self.constraint_row(row_elem,column_elem,value, matrix))
+        # print self.constraint_column(row_elem,column_elem,value, matrix)
+        # print self.constraint_square(row_elem, column_elem, value, matrix)
+        # print (self.constraint_row(row_elem,column_elem,value, matrix) and self.constraint_column(row_elem,column_elem,value, matrix)) and self.constraint_square(row_elem, column_elem, value, matrix)
+        # print("\n")
+
         return (self.constraint_row(row_elem,column_elem,value, matrix) and self.constraint_column(row_elem,column_elem,value, matrix)) and self.constraint_square(row_elem, column_elem, value, matrix)
 
     def constraint_row(self, row_elem, column_elem, value, matrix):
         for row_compare in self.B:
             if row_elem != row_compare:
                 #compare_value = matrix[column_elem, row_compare]
-                if(matrix[column_elem, row_compare] == value):
+                test = matrix[row_compare, column_elem]
+                if(matrix[row_compare, column_elem] == value):
                     return False
         return True
 
@@ -142,7 +170,7 @@ class Sudoku:
         for column_compare in self.B:
             if column_elem != column_compare:
                 #compare_value = self.matrix[column_compare, row_elem]
-                if (matrix[column_compare, row_elem] == value):
+                if (matrix[row_elem, column_compare] == value):
                     return False
         return True
 
@@ -159,18 +187,19 @@ class Sudoku:
             for column_compare in b2:
                 if not( (row_elem == row_compare) & (column_elem == column_compare)):
                     #compare_value = matrix[column_compare, row_compare]
-                    if (matrix[column_compare, row_compare] == value):
+                    if (matrix[row_compare, column_compare] == value):
                         return False
         return True
 
 
 #file = "sudokus/puz-001_solved_missing.txt"
-file = "sudokus/puz-010.txt"
+file = "sudokus/puz-100.txt"
 
 matrix = read_file(file)
 
 sudoku = Sudoku(matrix)
 print sudoku.backtracking_search()
+print sudoku.get_nr_guesses()
 
 #print matrix
 
