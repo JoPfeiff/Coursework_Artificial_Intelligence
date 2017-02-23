@@ -1,5 +1,6 @@
 import numpy as np
 import copy
+import itertools
 
 
 def read_file(file_name):
@@ -34,7 +35,7 @@ class Sudoku:
         self.matrix = matrix
         self.domain_dict = self.initialize_domain(self.matrix)
 
-
+        self.depth = 0
 
         print "done"
 
@@ -66,13 +67,16 @@ class Sudoku:
                     for value in domain_dict[str(i)+str(j)]:
                         if self.check_constrainst(i, j, value, matrix):
                             new_domain.append(value)
+                    if new_domain == []:
+                        print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
+                        return False
                     domain_dict[str(i) + str(j)] = new_domain
 
         return domain_dict
 
     def backtracking_search(self):
-
-        return self.recursive_backtracking(self.domain_dict,self.matrix)
+        new_domain_dict = self.update_domains(self.matrix, self.domain_dict)
+        return self.recursive_backtracking(new_domain_dict,self.matrix, 0)
 
     def get_next_variable(self, matrix):
         for i in self.B:
@@ -80,39 +84,47 @@ class Sudoku:
                 if matrix[i,j] == 0:
                     return i,j
 
-    def recursive_backtracking(self, domain_dict, matrix):
+    def get_best_next_variable(self, domain_dict):
+        min_length = 10
+        best = None
+        for key, value in domain_dict.items():
+            length = len(value)
+            if length == 1 :
+                return int(key[0]), int(key[1])
+            if (length > 0) and (length < min_length):
+                min_length = length
+                best = key
+        return int(best[0]), int(best[1])
+
+    def recursive_backtracking(self, domain_dict, matrix, depth):
         if not 0 in matrix:
             return matrix
 
-        # put unassigned variable here
-        domain_dict = self.update_domains(matrix, domain_dict)
-        i, j = self.get_next_variable(matrix)
-
-        print "%s%s" %(i,j)
-
-        if (i == 8) and (j == 8):
-            print "here"
+        #i, j = self.get_next_variable(matrix)
+        i, j = self.get_best_next_variable(domain_dict)
         for value in domain_dict[str(i)+str(j)]:
-            if self.check_constrainst(i,j,value,matrix):
-                new_matrix = copy.copy(matrix)
-                new_matrix[i,j] = value
-                new_domain_dict = copy.copy(domain_dict)
-                new_domain_dict[str(i)+str(j)] = []
-                new_domain_dict = self.update_domains(new_matrix,new_domain_dict)
-                if 0 not in new_matrix:
-                    return matrix
-                result =  self.recursive_backtracking(new_domain_dict,new_matrix)
-                #print result
 
-                # if result is False:
-                #     print "\n"
-                #     print matrix
+            print ("depth = %s, length = %s" ) %(depth, len(domain_dict[str(i)+str(j)]))
+            # if self.check_constrainst(i,j,value,matrix):
+            new_matrix , new_domain_dict = self.set_value(matrix, domain_dict, i,j,value)
+            #print new_matrix
+            #print ("i = %s, j= %s, value = %s \n\n") %(i,j,domain_dict[str(i)+str(j)])
+            new_domain_dict = self.update_domains(new_matrix, new_domain_dict)
+            if new_domain_dict is not False:
+                #return False
+                result =  self.recursive_backtracking(new_domain_dict,new_matrix, depth+1)
 
                 if result is not False:
                     return result
 
         return False
 
+    def set_value(self,matrix, domain_dict, i,j,value):
+        new_matrix = copy.deepcopy(matrix)
+        new_domain_dict = copy.deepcopy(domain_dict)
+        new_matrix[i,j] = value
+        new_domain_dict[str(i)+str(j)] = []
+        return new_matrix, new_domain_dict
 
     def check_constrainst(self, row_elem, column_elem, value, matrix):
         return (self.constraint_row(row_elem,column_elem,value, matrix) and self.constraint_column(row_elem,column_elem,value, matrix)) and self.constraint_square(row_elem, column_elem, value, matrix)
@@ -153,7 +165,7 @@ class Sudoku:
 
 
 #file = "sudokus/puz-001_solved_missing.txt"
-file = "sudokus/puz-001.txt"
+file = "sudokus/puz-010.txt"
 
 matrix = read_file(file)
 
