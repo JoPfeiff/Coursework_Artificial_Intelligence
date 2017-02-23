@@ -31,7 +31,10 @@ class Sudoku:
     b = [range(0,3), range(3,6), range(6,9)]
     D = range(1,10)
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, ac3, mvr):
+
+        self.ac3 = ac3
+        self.mvr = mvr
         self.matrix = matrix
         self.domain_dict = self.initialize_domain(self.matrix)
 
@@ -54,47 +57,50 @@ class Sudoku:
 
 
     def update_domains(self, matrix, domain_dict):
-        for i in self.B:
-            for j in self.B:
-                #if (i == 0 and j == 4):
-                    #print "hi"
-                if matrix[i,j] == 0:
-                    # if len(domain_dict[str(i)+str(j)]) == 1:
-                    #     matrix[i,j] = domain_dict[str(i)+str(j)][0]
-                    # elif len(domain_dict[str(i) + str(j)]) == 0:
-                    #     return False
-                    #
-                    # else:
-                    new_domain = []
-                    for value in domain_dict[str(i)+str(j)]:
-                        if self.check_constrainst(i, j, value, matrix):
-                            new_domain.append(value)
-                    if new_domain == []:
-                        # print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
-                        return False
-                    domain_dict[str(i) + str(j)] = new_domain
+        if self.ac3:
+            for i in self.B:
+                for j in self.B:
+                    #if (i == 0 and j == 4):
+                        #print "hi"
+                    if matrix[i,j] == 0:
+                        # if len(domain_dict[str(i)+str(j)]) == 1:
+                        #     matrix[i,j] = domain_dict[str(i)+str(j)][0]
+                        # elif len(domain_dict[str(i) + str(j)]) == 0:
+                        #     return False
+                        #
+                        # else:
+                        new_domain = []
+                        for value in domain_dict[str(i)+str(j)]:
+                            if self.check_constrainst(i, j, value, matrix):
+                                new_domain.append(value)
+                        if new_domain == []:
+                            # print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
+                            return False
+                        domain_dict[str(i) + str(j)] = new_domain
 
         return domain_dict
 
     def backtracking_search(self):
-        ##############
-        # forward selection
-        ##################
         new_domain_dict = self.update_domains(self.matrix, self.domain_dict)
-
-        ##############
-        # NO forward selection
-        ##################
-        #new_domain_dict = self.domain_dict
-
-
         return self.recursive_backtracking(new_domain_dict,self.matrix, 0)
 
-    def get_next_variable(self, matrix):
-        for i in self.B:
-            for j in self.B:
-                if matrix[i,j] == 0:
-                    return i,j
+    def get_next_variable(self, matrix, domain_dict):
+        if(self.mvr):
+            min_length = 10
+            best = None
+            for key, value in domain_dict.items():
+                length = len(value)
+                if length == 1:
+                    return int(key[0]), int(key[1])
+                if (length > 0) and (length < min_length):
+                    min_length = length
+                    best = key
+            return int(best[0]), int(best[1])
+        else:
+            for i in self.B:
+                for j in self.B:
+                    if matrix[i,j] == 0:
+                        return i,j
 
     def get_best_next_variable(self, domain_dict):
         min_length = 10
@@ -116,8 +122,8 @@ class Sudoku:
             return matrix
 
 
-        #i, j = self.get_next_variable(matrix)
-        i, j = self.get_best_next_variable(domain_dict)
+        i, j = self.get_next_variable(matrix, domain_dict)
+        #i, j = self.get_best_next_variable(domain_dict)
         self.guess += len(domain_dict[str(i) + str(j)]) - 1
         for value in domain_dict[str(i)+str(j)]:
 
@@ -125,12 +131,7 @@ class Sudoku:
             if self.check_constrainst(i,j,value,matrix):
                 new_matrix , new_domain_dict = self.set_value(matrix, domain_dict, i,j,value)
 
-                ##############
-                # forward selection
-                ##################
                 new_domain_dict = self.update_domains(new_matrix, new_domain_dict)
-
-
                 if new_domain_dict is not False:
                     #return False
                     result =  self.recursive_backtracking(new_domain_dict,new_matrix, depth+1)
@@ -197,7 +198,7 @@ file = "sudokus/puz-100.txt"
 
 matrix = read_file(file)
 
-sudoku = Sudoku(matrix)
+sudoku = Sudoku(matrix, False, False)
 print sudoku.backtracking_search()
 print sudoku.get_nr_guesses()
 
