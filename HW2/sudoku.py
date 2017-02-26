@@ -1,6 +1,8 @@
 import numpy as np
 import copy
 import itertools
+import os
+# import List
 
 
 def read_file(file_name):
@@ -42,7 +44,6 @@ class Sudoku:
 
         self.guess = 0
 
-        print "done"
 
 
     def initialize_domain(self, matrix):
@@ -77,7 +78,7 @@ class Sudoku:
                             # print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
                             return False
                         domain_dict[str(i) + str(j)] = new_domain
-
+        domain_dict = self.x_wing(domain_dict)
         return domain_dict
 
     def backtracking_search(self):
@@ -102,6 +103,43 @@ class Sudoku:
                     if matrix[i,j] == 0:
                         return i,j
 
+    def x_wing(self, domain_dict):
+        for r1 in self.B:
+            for r2 in self.B:
+                if r1 != r2:
+                    for c1 in self.B:
+                        for c2 in self.B:
+                            if c1 != c2:
+                                all_domains = set(domain_dict[str(r1) + str(c1)]) \
+                                            | set(domain_dict[str(r1) + str(c2)]) \
+                                            | set(domain_dict[str(r2) + str(c1)]) \
+                                            | set(domain_dict[str(r2) + str(c2)])
+                                #resultList = [1, 2, 5, 7, 9]
+                                for domain in all_domains:
+                                    if domain not in domain_dict[str(r1)+ str(c1)]:
+                                        break
+                                    if domain not in domain_dict[str(r1) + str(c2)]:
+                                        break
+                                    if domain not in domain_dict[str(r2) + str(c1)]:
+                                        break
+                                    if domain not in domain_dict[str(r2) + str(c2)]:
+                                        break
+
+                                    for row in [r1,r2]:
+                                        for column in self.B:
+                                            if column not in [c1,c2]:
+                                                if domain in domain_dict[str(row) + str(column)]:
+                                                    domain_dict[str(row) + str(column)].remove(domain)
+                                    for column in [c1,c2]:
+                                       for row in self.B:
+                                           if row not in [r1,r2]:
+                                               if domain in domain_dict[str(row) + str(column)]:
+                                                   domain_dict[str(row) + str(column)].remove(domain)
+        return domain_dict
+
+
+
+
     def get_best_next_variable(self, domain_dict):
         min_length = 10
         best = None
@@ -121,6 +159,7 @@ class Sudoku:
         if not 0 in matrix:
             return matrix
 
+        #print matrix
 
         i, j = self.get_next_variable(matrix, domain_dict)
         #i, j = self.get_best_next_variable(domain_dict)
@@ -194,13 +233,17 @@ class Sudoku:
 
 
 #file = "sudokus/puz-001_solved_missing.txt"
-file = "sudokus/puz-100.txt"
 
-matrix = read_file(file)
+for file in os.listdir("sudokus/"):
+    if file.endswith(".txt"):
+        #file = "sudokus/puz-001.txt"
 
-sudoku = Sudoku(matrix, False, False)
-print sudoku.backtracking_search()
-print sudoku.get_nr_guesses()
+        matrix = read_file("sudokus/"+file)
+
+        sudoku = Sudoku(matrix, True, True)
+        sudoku.backtracking_search()
+        print("File %s: nr of guesses = %s") %(file, sudoku.get_nr_guesses())
+        #print sudoku.get_nr_guesses()
 
 #print matrix
 
