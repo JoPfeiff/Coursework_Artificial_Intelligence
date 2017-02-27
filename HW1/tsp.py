@@ -316,7 +316,7 @@ if __name__=="__main__":
     costs=[]
     times=[]
 
-    graph_size = 4
+    graph_size = 8
 
 #points = simple_generator(5)
 
@@ -327,27 +327,27 @@ if __name__=="__main__":
 #print "cost: %s" %(cost)
 #for v in pred: print "%s: %s" % (v, pred[v])
 
-    for i in range(1,10):
+    for i in range(11,12):
         points = simple_generator(i)
         x,y,z=a_star(points)
         counts.append(x)
         costs.append(i)
         times.append(z)
     
-    fig=plt.figure()
-    for i in range(1,9):
-        plt.scatter(costs[i],counts[i])
+    #fig=plt.figure()
+    #for i in range(1,9):
+    #    plt.scatter(costs[i],counts[i])
     #plt.show()
-    plt.xlabel('No. of cities', fontsize=18)
-    plt.ylabel('Number of nodes expanded', fontsize=16)
-    fig.savefig('Nodes vs Solution Length.jpg')
+    #plt.xlabel('No. of cities', fontsize=18)
+    #plt.ylabel('Number of nodes expanded', fontsize=16)
+    #fig.savefig('Nodes vs Solution Length.jpg')
     
-    
-    fig2=plt.figure()
-    for i in range(1,9):
-        plt.scatter(costs[i],times[i])
+
+    #fig2=plt.figure()
+    #for i in range(1,9):
+    #    plt.scatter(costs[i],times[i])
     #plt.show()
-    plt.xlabel('No. of cities', fontsize=18)
-    plt.ylabel('Time to completion', fontsize=16)
-    fig2.savefig('Time vs Solution Length.jpg')
+    #plt.xlabel('No. of cities', fontsize=18)
+    #plt.ylabel('Time to completion', fontsize=16)
+    #fig2.savefig('Time vs Solution Length.jpg')
 

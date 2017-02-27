@@ -3,6 +3,7 @@ import copy
 import itertools
 import os
 # import List
+import time
 
 
 def read_file(file_name):
@@ -33,10 +34,11 @@ class Sudoku:
     b = [range(0,3), range(3,6), range(6,9)]
     D = range(1,10)
 
-    def __init__(self, matrix, ac3, mvr):
+    def __init__(self, matrix, ac3 = True, mvr = True, xwing = True):
 
         self.ac3 = ac3
         self.mvr = mvr
+        self.xwing = xwing
         self.matrix = matrix
         self.domain_dict = self.initialize_domain(self.matrix)
 
@@ -56,29 +58,33 @@ class Sudoku:
                     domain_dict[str(i)+str(j)] = self.D
         return domain_dict
 
+    def ac3_algo(self,  matrix, domain_dict):
+        for i in self.B:
+            for j in self.B:
+                # if (i == 0 and j == 4):
+                # print "hi"
+                if matrix[i, j] == 0:
+                    # if len(domain_dict[str(i)+str(j)]) == 1:
+                    #     matrix[i,j] = domain_dict[str(i)+str(j)][0]
+                    # elif len(domain_dict[str(i) + str(j)]) == 0:
+                    #     return False
+                    #
+                    # else:
+                    new_domain = []
+                    for value in domain_dict[str(i) + str(j)]:
+                        if self.check_constrainst(i, j, value, matrix):
+                            new_domain.append(value)
+                    if new_domain == []:
+                        # print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
+                        return False
+                    domain_dict[str(i) + str(j)] = new_domain
+        return domain_dict
 
     def update_domains(self, matrix, domain_dict):
         if self.ac3:
-            for i in self.B:
-                for j in self.B:
-                    #if (i == 0 and j == 4):
-                        #print "hi"
-                    if matrix[i,j] == 0:
-                        # if len(domain_dict[str(i)+str(j)]) == 1:
-                        #     matrix[i,j] = domain_dict[str(i)+str(j)][0]
-                        # elif len(domain_dict[str(i) + str(j)]) == 0:
-                        #     return False
-                        #
-                        # else:
-                        new_domain = []
-                        for value in domain_dict[str(i)+str(j)]:
-                            if self.check_constrainst(i, j, value, matrix):
-                                new_domain.append(value)
-                        if new_domain == []:
-                            # print("error in %s %s, value = %s") %(i,j, domain_dict[str(i)+str(j)])
-                            return False
-                        domain_dict[str(i) + str(j)] = new_domain
-        domain_dict = self.x_wing(domain_dict)
+            domain_dict = self.ac3_algo(matrix, domain_dict)
+        if self.xwing:
+            domain_dict = self.x_wing(domain_dict)
         return domain_dict
 
     def backtracking_search(self):
@@ -104,6 +110,9 @@ class Sudoku:
                         return i,j
 
     def x_wing(self, domain_dict):
+        start = time.time()
+        if domain_dict is False:
+            return domain_dict
         for r1 in self.B:
             for r2 in self.B:
                 if r1 != r2:
@@ -125,16 +134,50 @@ class Sudoku:
                                     if domain not in domain_dict[str(r2) + str(c2)]:
                                         break
 
+                                    row_xwing = True
                                     for row in [r1,r2]:
-                                        for column in self.B:
-                                            if column not in [c1,c2]:
-                                                if domain in domain_dict[str(row) + str(column)]:
-                                                    domain_dict[str(row) + str(column)].remove(domain)
+                                        if row_xwing == True:
+                                            for column in self.B:
+                                                if column not in [c1,c2]:
+                                                    if(domain in domain_dict[str(row) + str(column)]):
+                                                        row_xwing = False
+                                                        break
+
+                                    if row_xwing:
+                                        for column in [c1, c2]:
+                                            for row in self.B:
+                                                if row not in [r1, r2]:
+                                                    if domain in domain_dict[str(row) + str(column)]:
+                                                        domain_dict[str(row) + str(column)].remove(domain)
+
+                                    column_xwing = True
                                     for column in [c1,c2]:
-                                       for row in self.B:
-                                           if row not in [r1,r2]:
-                                               if domain in domain_dict[str(row) + str(column)]:
-                                                   domain_dict[str(row) + str(column)].remove(domain)
+                                        if column_xwing == True:
+                                            for row in self.B:
+                                                if row not in [r1,r2]:
+                                                    if(domain in domain_dict[str(row) + str(column)]):
+                                                        column_xwing = False
+                                                        break
+
+                                    if column_xwing:
+                                        for row in [r1, r2]:
+                                            for column in self.B:
+                                                if column not in [c1, c2]:
+                                                    if domain in domain_dict[str(row) + str(column)]:
+                                                        domain_dict[str(row) + str(column)].remove(domain)
+
+                                    # for row in [r1,r2]:
+                                    #     for column in self.B:
+                                    #         if column not in [c1,c2]:
+                                    #             if domain in domain_dict[str(row) + str(column)]:
+                                    #                 domain_dict[str(row) + str(column)].remove(domain)
+                                    # for column in [c1,c2]:
+                                    #    for row in self.B:
+                                    #        if row not in [r1,r2]:
+                                    #            if domain in domain_dict[str(row) + str(column)]:
+                                    #                domain_dict[str(row) + str(column)].remove(domain)
+
+        #print "Time = %s" %(time.time()-start)
         return domain_dict
 
 
@@ -240,10 +283,52 @@ for file in os.listdir("sudokus/"):
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku = Sudoku(matrix, True, True)
+        sudoku = Sudoku(matrix, ac3 = False, xwing=False, mvr = False)
         sudoku.backtracking_search()
-        print("File %s: nr of guesses = %s") %(file, sudoku.get_nr_guesses())
+        print("File %s: nr of simple guesses = %s") %(file, sudoku.get_nr_guesses())
+        sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = False)
+        sudoku.backtracking_search()
+        print("File %s: nr of ac3 guesses = %s") %(file, sudoku.get_nr_guesses())
+        sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+        sudoku.backtracking_search()
+        print("File %s: nr of all guesses = %s \n") %(file, sudoku.get_nr_guesses())
         #print sudoku.get_nr_guesses()
 
 #print matrix
 
+#
+# File puz-001.txt: nr of guesses = 0
+#
+# File puz-001_solved.txt: nr of guesses = 0
+#
+# File puz-001_solved_missing.txt: nr of guesses = 0
+#
+# File puz-002.txt: nr of guesses = 0
+#
+# File puz-010.txt: nr of guesses = 0
+#
+# File puz-015.txt: nr of guesses = 0
+#
+# File puz-025.txt: nr of guesses = 0
+#
+# File puz-026.txt: nr of guesses = 22
+#
+# File puz-048.txt: nr of guesses = 6
+#
+# File puz-051.txt: nr of guesses = 2
+#
+# File puz-062.txt: nr of guesses = 10
+#
+# File puz-076.txt: nr of guesses = 6
+#
+# File puz-081.txt: nr of guesses = 5
+#
+# File puz-082.txt: nr of guesses = 22
+#
+# File puz-090.txt: nr of guesses = 25
+#
+# File puz-095.txt: nr of guesses = 28
+#
+# File puz-099.txt: nr of guesses = 13
+#
+# File puz-100.txt: nr of guesses = 6
