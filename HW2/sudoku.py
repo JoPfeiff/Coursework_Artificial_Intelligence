@@ -61,15 +61,7 @@ class Sudoku:
     def ac3_algo(self,  matrix, domain_dict):
         for i in self.B:
             for j in self.B:
-                # if (i == 0 and j == 4):
-                # print "hi"
                 if matrix[i, j] == 0:
-                    # if len(domain_dict[str(i)+str(j)]) == 1:
-                    #     matrix[i,j] = domain_dict[str(i)+str(j)][0]
-                    # elif len(domain_dict[str(i) + str(j)]) == 0:
-                    #     return False
-                    #
-                    # else:
                     new_domain = []
                     for value in domain_dict[str(i) + str(j)]:
                         if self.check_constrainst(i, j, value, matrix):
@@ -79,6 +71,18 @@ class Sudoku:
                         return False
                     domain_dict[str(i) + str(j)] = new_domain
         return domain_dict
+
+
+    def ac3_algo_new(self, matrix, domain_dict):
+        queue = []
+        for item in domain_dict.items():
+            queue.append([item])
+
+        while len(queue) > 0:
+            print(" ")
+
+
+
 
     def update_domains(self, matrix, domain_dict):
         if self.ac3:
@@ -95,7 +99,7 @@ class Sudoku:
         if(self.mvr):
             min_length = 10
             best = None
-            for key, value in domain_dict.items():
+            for key, value in sorted(domain_dict.items()):
                 length = len(value)
                 if length == 1:
                     return int(key[0]), int(key[1])
@@ -286,12 +290,12 @@ for file in os.listdir("sudokus/"):
         sudoku = Sudoku(matrix, ac3 = False, xwing=False, mvr = False)
         sudoku.backtracking_search()
         print("File %s: nr of simple guesses = %s") %(file, sudoku.get_nr_guesses())
-        sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = False)
+        sudoku = Sudoku(matrix, ac3 = False, xwing=False, mvr = True)
         sudoku.backtracking_search()
-        print("File %s: nr of ac3 guesses = %s") %(file, sudoku.get_nr_guesses())
-        sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
-        sudoku.backtracking_search()
-        print("File %s: nr of all guesses = %s \n") %(file, sudoku.get_nr_guesses())
+        print("File %s: nr of MRV guesses = %s\n") %(file, sudoku.get_nr_guesses())
+        # sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+        # sudoku.backtracking_search()
+        # print("File %s: nr of all guesses = %s \n") %(file, sudoku.get_nr_guesses())
         #print sudoku.get_nr_guesses()
 
 #print matrix
