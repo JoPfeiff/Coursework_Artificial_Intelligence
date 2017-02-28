@@ -282,7 +282,7 @@ class Sudoku:
                     if (matrix[row_compare, column_compare] == value):
                         return False
         return True
-
+#f
 
 #file = "sudokus/puz-001_solved_missing.txt"
 
