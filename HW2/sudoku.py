@@ -55,7 +55,7 @@ class Sudoku:
                 if matrix[i,j] != 0:
                     domain_dict[str(i)+str(j)] = []
                 else:
-                    domain_dict[str(i)+str(j)] = self.D
+                    domain_dict[str(i)+str(j)] = copy.copy(self.D)
         return domain_dict
 
     def ac3_algo(self,  matrix, domain_dict):
@@ -88,7 +88,7 @@ class Sudoku:
         if self.ac3:
             domain_dict = self.ac3_algo(matrix, domain_dict)
         if self.xwing:
-            domain_dict = self.x_wing(domain_dict)
+            domain_dict = self.x_wing(domain_dict, matrix)
         return domain_dict
 
     def backtracking_search(self):
@@ -106,6 +106,10 @@ class Sudoku:
                 if (length > 0) and (length < min_length):
                     min_length = length
                     best = key
+
+            if(best == None):
+                print("")
+
             return int(best[0]), int(best[1])
         else:
             for i in self.B:
@@ -113,7 +117,7 @@ class Sudoku:
                     if matrix[i,j] == 0:
                         return i,j
 
-    def x_wing(self, domain_dict):
+    def x_wing(self, domain_dict, matrix):
         start = time.time()
         if domain_dict is False:
             return domain_dict
@@ -129,23 +133,26 @@ class Sudoku:
                                             | set(domain_dict[str(r2) + str(c2)])
                                 #resultList = [1, 2, 5, 7, 9]
                                 for domain in all_domains:
-                                    if domain not in domain_dict[str(r1)+ str(c1)]:
+                                    if (domain not in domain_dict[str(r1)+ str(c1)]) and (not self.check_constrainst(r1, c1, domain, matrix)):
                                         break
-                                    if domain not in domain_dict[str(r1) + str(c2)]:
+                                    if (domain not in domain_dict[str(r1) + str(c2)])  and (not self.check_constrainst(r1, c2, domain, matrix)):
                                         break
-                                    if domain not in domain_dict[str(r2) + str(c1)]:
+                                    if (domain not in domain_dict[str(r2) + str(c1)]) and (not self.check_constrainst(r2, c1, domain, matrix)):
                                         break
-                                    if domain not in domain_dict[str(r2) + str(c2)]:
+                                    if (domain not in domain_dict[str(r2) + str(c2)])  and (not self.check_constrainst(r2, c2, domain, matrix)):
                                         break
 
                                     row_xwing = True
                                     for row in [r1,r2]:
                                         if row_xwing == True:
+
                                             for column in self.B:
                                                 if column not in [c1,c2]:
                                                     if(domain in domain_dict[str(row) + str(column)]):
                                                         row_xwing = False
                                                         break
+                                        else:
+                                            break
 
                                     if row_xwing:
                                         for column in [c1, c2]:
@@ -162,6 +169,8 @@ class Sudoku:
                                                     if(domain in domain_dict[str(row) + str(column)]):
                                                         column_xwing = False
                                                         break
+                                        else:
+                                            break
 
                                     if column_xwing:
                                         for row in [r1, r2]:
@@ -169,6 +178,8 @@ class Sudoku:
                                                 if column not in [c1, c2]:
                                                     if domain in domain_dict[str(row) + str(column)]:
                                                         domain_dict[str(row) + str(column)].remove(domain)
+
+
 
                                     # for row in [r1,r2]:
                                     #     for column in self.B:
@@ -235,12 +246,6 @@ class Sudoku:
         return new_matrix, new_domain_dict
 
     def check_constrainst(self, row_elem, column_elem, value, matrix):
-        # print (self.constraint_row(row_elem,column_elem,value, matrix))
-        # print self.constraint_column(row_elem,column_elem,value, matrix)
-        # print self.constraint_square(row_elem, column_elem, value, matrix)
-        # print (self.constraint_row(row_elem,column_elem,value, matrix) and self.constraint_column(row_elem,column_elem,value, matrix)) and self.constraint_square(row_elem, column_elem, value, matrix)
-        # print("\n")
-
         return (self.constraint_row(row_elem,column_elem,value, matrix) and self.constraint_column(row_elem,column_elem,value, matrix)) and self.constraint_square(row_elem, column_elem, value, matrix)
 
     def constraint_row(self, row_elem, column_elem, value, matrix):
@@ -281,22 +286,32 @@ class Sudoku:
 
 #file = "sudokus/puz-001_solved_missing.txt"
 
+# file = "empty.txti"
+# #
+# matrix = read_file("sudokus/"+file)
+# sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+# matrix = sudoku.backtracking_search()
+# print(matrix)
+# print("File %s: nr of MRV guesses = %s\n") %(file, sudoku.get_nr_guesses())
 for file in os.listdir("sudokus/"):
     if file.endswith(".txt"):
         #file = "sudokus/puz-001.txt"
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku = Sudoku(matrix, ac3 = False, xwing=False, mvr = False)
-        sudoku.backtracking_search()
-        print("File %s: nr of simple guesses = %s") %(file, sudoku.get_nr_guesses())
-        sudoku = Sudoku(matrix, ac3 = False, xwing=False, mvr = True)
-        sudoku.backtracking_search()
-        print("File %s: nr of MRV guesses = %s\n") %(file, sudoku.get_nr_guesses())
-        # sudoku = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+        sudoku1 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+        matrix1 = sudoku1.backtracking_search()
+        print matrix1
+        print("File %s: nr of AC3 MRV guesses = %s") %(file, sudoku1.get_nr_guesses())
+
+        sudoku2 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True)
+        matrix2 = sudoku2.backtracking_search()
+        print(matrix2)
+        print("File %s: nr of AC3 MRV XWING guesses = %s\n") %(file, sudoku2.get_nr_guesses())
+        # sudoku = Sudoku(matrix, ac3 = False, xwing=True, mvr = True)
         # sudoku.backtracking_search()
-        # print("File %s: nr of all guesses = %s \n") %(file, sudoku.get_nr_guesses())
-        #print sudoku.get_nr_guesses()
+        # print("File %s: nr of XWING guesses = %s \n") %(file, sudoku.get_nr_guesses())
+        # print sudoku.get_nr_guesses()
 
 #print matrix
 
