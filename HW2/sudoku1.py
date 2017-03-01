@@ -25,7 +25,6 @@ def read_file(file_name):
 
 
 
-
 class Sudoku:
 
 
@@ -46,6 +45,74 @@ class Sudoku:
 
         self.guess = 0
 
+    def get_arcs(self,matrix,domain_dict):
+        arcs=[]
+
+        keys=domain_dict.keys()
+        start_cells= [i for i in keys if matrix[i] == 0]
+        end_cells=[i for i in keys]
+
+        
+        for start_cell in start_cells:
+            for end_cell in end_cells:
+                if start_cell!=end_cell and self.isNeighbour(start_cell,end_cell):
+                    arcs.append((start_cell,end_cell))
+        return arcs
+
+    def ac3_newest(self, matrix,domain_dict):
+        arcs=self.get_arcs(matrix,domain_dict)
+        while arcs:
+            start_variable,end_variable=arcs.pop(0)
+            if self.revise(domain_dict, start_variable, end_variable):
+
+
+                if not domain_dict[start_variable]:
+                    return False
+
+                neighbors = self.get_neighbors(start_variable,domain_dict)
+                for neighbor in neighbors:
+                     if end_variable != neighbor:
+                        arcs.append((neighbor, start_variable))
+        return domain_dict
+
+    def revise(self,domain_dict,start_variable,end_variable):
+        is_revised = False
+
+        for value in domain_dict[start_variable]:
+            end_domain = domain_dict[end_variable]
+
+            if value not in end_domain:
+                continue
+            if len(end_domain)==1:
+                domain_dict[start_variable].remove(value)
+                is_revised = True
+
+        return is_revised
+
+
+    def getNeighbour(self,cell,domain_dict):
+        keys=domain_dict.keys()
+        neighbors = []
+        end_cells=[i for i in keys]
+        for end_cell in end_cells:
+            if cell!=end_cell and isNeighbour(cell,end_cell):
+                neighbors.append(end_cell)
+        return neighbors
+
+
+    def isNeighbour(self,cell1,cell2):
+
+        same_box_row = False
+        same_box_column = False
+        for box in self.b:
+            if (cell1[0] in box) and (cell2[0] in box):
+                same_box_row = True
+            if (cell1[1] in box) and (cell2[1] in box):
+               same_box_column = True
+
+        if cell1[0]==cell2[0] or cell1[1]==cell2[1] or (same_box_column and same_box_row):
+            return True
+
 
 
     def initialize_domain(self, matrix):
@@ -55,7 +122,7 @@ class Sudoku:
                 if matrix[i,j] != 0:
                     domain_dict[str(i)+str(j)] = []
                 else:
-                    domain_dict[str(i)+str(j)] = copy.copy(self.D)
+                    domain_dict[str(i)+str(j)] = copy.deepcopy(self.D)
         return domain_dict
 
     def ac3_algo(self,  matrix, domain_dict):
@@ -72,7 +139,6 @@ class Sudoku:
                     domain_dict[str(i) + str(j)] = new_domain
         return domain_dict
 
-
     def ac3_algo_new(self, matrix, domain_dict):
         queue = []
         for item in domain_dict.items():
@@ -81,34 +147,52 @@ class Sudoku:
         while len(queue) > 0:
             print(" ")
 
-
-
-
     def update_domains(self, matrix, domain_dict):
         if self.ac3:
-            domain_dict = self.ac3_algo(matrix, domain_dict)
+            # domain_dict = self.ac3_algo(matrix, domain_dict)
+            # print "before",domain_dict
+            domain_dict=self.ac3_newest(matrix, domain_dict)
+            # print "    "
+            # print "after",domain_dict
+            # print "    "
         if self.xwing:
             domain_dict = self.x_wing(domain_dict, matrix)
         return domain_dict
 
     def backtracking_search(self):
+        
         new_domain_dict = self.update_domains(self.matrix, self.domain_dict)
         return self.recursive_backtracking(new_domain_dict,self.matrix, 0)
 
     def get_next_variable(self, matrix, domain_dict):
+        # print matrix
+
         if(self.mvr):
-            min_length = 10
+            min_length = float('inf')
             best = None
             for key, value in sorted(domain_dict.items()):
-                length = len(value)
-                if length == 1:
-                    return int(key[0]), int(key[1])
-                if (length > 0) and (length < min_length):
+                if matrix[key] != 0:
+                    continue 
+                
+                # print 'Key', key
+
+                length=0
+                for i in value:
+                    length += int(self.check_constrainst(int(key[0]), int(key[1]), i, matrix))
+
+                # print '    ', length, min_length
+
+                # if length == 0:
+                #     continue
+
+                if length < min_length:
                     min_length = length
                     best = key
-
-            if(best == None):
-                print("")
+            if best is None:
+                for i in self.B:
+                    for j in self.B:
+                        if matrix[i,j] == 0:
+                            return i,j
 
             return int(best[0]), int(best[1])
         else:
@@ -198,40 +282,43 @@ class Sudoku:
 
 
 
-    def get_best_next_variable(self, domain_dict):
-        min_length = 10
-        best = None
-        for key, value in domain_dict.items():
-            length = len(value)
-            if length == 1 :
-                return int(key[0]), int(key[1])
-            if (length > 0) and (length < min_length):
-                min_length = length
-                best = key
-        return int(best[0]), int(best[1])
+    # def get_best_next_variable(self, domain_dict):
+    #     min_length = 10
+    #     best = None
+    #     for key, value in domain_dict.items():
+    #         length = len(value)
+    #         if length == 1 :
+    #             return int(key[0]), int(key[1])
+    #         if (length > 0) and (length < min_length):
+    #             min_length = length
+    #             best = key
+    #     return int(best[0]), int(best[1])
 
     def get_nr_guesses(self):
         return self.guess
 
     def recursive_backtracking(self, domain_dict, matrix, depth):
+        # print matrix
         if not 0 in matrix:
             return matrix
 
         #print matrix
 
         i, j = self.get_next_variable(matrix, domain_dict)
+
         #i, j = self.get_best_next_variable(domain_dict)
+
+        # print domain_dict[str(i) + str(j)]
         self.guess += len(domain_dict[str(i) + str(j)]) - 1
-        for value in domain_dict[str(i)+str(j)]:
+        for value in domain_dict[str(i) + str(j)]:
 
             # print ("depth = %s, length = %s" ) %(depth, len(domain_dict[str(i)+str(j)]))
             if self.check_constrainst(i,j,value,matrix):
-                new_matrix , new_domain_dict = self.set_value(matrix, domain_dict, i,j,value)
+                new_matrix, new_domain_dict = self.set_value(matrix, domain_dict, i,j,value)
 
                 new_domain_dict = self.update_domains(new_matrix, new_domain_dict)
                 if new_domain_dict is not False:
-                    #return False
-                    result =  self.recursive_backtracking(new_domain_dict,new_matrix, depth+1)
+                    result = self.recursive_backtracking(new_domain_dict,new_matrix, depth+1)
 
                     if result is not False:
                         return result
@@ -252,8 +339,8 @@ class Sudoku:
         for row_compare in self.B:
             if row_elem != row_compare:
                 #compare_value = matrix[column_elem, row_compare]
-                test = matrix[row_compare, column_elem]
-                if(matrix[row_compare, column_elem] == value):
+                # test = matrix[row_compare, column_elem]
+                if (matrix[row_compare, column_elem] == value):
                     return False
         return True
 
@@ -277,7 +364,7 @@ class Sudoku:
 
         for row_compare in b1:
             for column_compare in b2:
-                if not( (row_elem == row_compare) & (column_elem == column_compare)):
+                if not( (row_elem == row_compare) and (column_elem == column_compare)):
                     #compare_value = matrix[column_compare, row_compare]
                     if (matrix[row_compare, column_compare] == value):
                         return False
@@ -294,20 +381,20 @@ class Sudoku:
 # print(matrix)
 # print("File %s: nr of MRV guesses = %s\n") %(file, sudoku.get_nr_guesses())
 for file in os.listdir("sudokus/"):
-    if file.endswith(".txt"):
+    if file.endswith("26.txt"):
         #file = "sudokus/puz-001.txt"
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku1 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+        sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mvr = True)
         matrix1 = sudoku1.backtracking_search()
         print matrix1
-        print("File %s: nr of AC3 MRV guesses = %s") %(file, sudoku1.get_nr_guesses())
+        print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
 
-        sudoku2 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True)
+        sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
         matrix2 = sudoku2.backtracking_search()
-        print(matrix2)
-        print("File %s: nr of AC3 MRV XWING guesses = %s\n") %(file, sudoku2.get_nr_guesses())
+        print matrix2
+        print("File %s: nr of MRV guesses = %s\n") %(file, sudoku2.get_nr_guesses())
         # sudoku = Sudoku(matrix, ac3 = False, xwing=True, mvr = True)
         # sudoku.backtracking_search()
         # print("File %s: nr of XWING guesses = %s \n") %(file, sudoku.get_nr_guesses())
