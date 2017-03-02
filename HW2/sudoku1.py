@@ -48,7 +48,6 @@ class Sudoku:
 
     def get_arcs(self,matrix,domain_dict):
         arcs=[]
-
         keys=domain_dict.keys()
         start_cells= [i for i in keys if matrix[i] == 0]
         end_cells=[i for i in keys]
@@ -70,6 +69,10 @@ class Sudoku:
                 if not domain_dict[start_variable]:
                     return False
 
+                if len(domain_dict[start_variable]) == 1:
+                    matrix[start_variable[0], start_variable[1]] = domain_dict[start_variable][0]
+                    domain_dict[start_variable] = []
+
                 neighbors = self.getNeighbour(start_variable,domain_dict)
                 for neighbor in neighbors:
                      if end_variable != neighbor:
@@ -78,29 +81,22 @@ class Sudoku:
 
     def revise(self,domain_dict, matrix,start_variable,end_variable):
         is_revised = False
-        #print(self.depth)
         for value in domain_dict[start_variable]:
-
-            # print matrix
-            # print value
-            # print start_variable
-            # print end_variable
-
             end_domain = domain_dict[end_variable]
-
             if (value not in end_domain) and (matrix[str(end_variable[0]) + str(end_variable[1])] != value):
                 continue
             if len(end_domain)==1:
                 domain_dict[start_variable].remove(value)
                 is_revised = True
 
-            # print  matrix[str(end_domain[0]) + str(end_domain[1])]
-            # print value
-            # print ""
             if (matrix[str(end_variable[0]) + str(end_variable[1])] == value):
 
                 domain_dict[start_variable].remove(value)
                 is_revised = True
+
+            # if len(domain_dict[start_variable]) == 1:
+            #     matrix[start_variable[0], start_variable[1]] = domain_dict[start_variable][0]
+            #     domain_dict[start_variable] = []
 
         return is_revised
 
@@ -162,6 +158,10 @@ class Sudoku:
             print(" ")
 
     def update_domains(self, matrix, domain_dict):
+        if self.ac3J:
+            domain_dict = self.ac3_algo(matrix, domain_dict)
+            if domain_dict is False:
+                return False
         if self.ac3:
             # domain_dict = self.ac3_algo(matrix, domain_dict)
             # print "before",domain_dict
@@ -169,8 +169,7 @@ class Sudoku:
             # print "    "
             # print "after",domain_dict
             # print "    "
-        if self.ac3J:
-            domain_dict = self.ac3_algo(matrix, domain_dict)
+
         if self.xwing:
             domain_dict = self.x_wing(domain_dict, matrix)
         return domain_dict
@@ -401,12 +400,12 @@ for file in os.listdir("sudokus/"):
         #     print "False"
         # print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
 
-        # sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = False,  ac3J = False)
-        # matrix2 = sudoku2.backtracking_search()
-        # if(matrix2 is False):
-        #     print "False"
-        # print("File %s: nr of AC3 guesses = %s") %(file, sudoku2.get_nr_guesses())
-        #
+        sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True,  ac3J = True)
+        matrix2 = sudoku2.backtracking_search()
+        if(matrix2 is False):
+            print "False"
+        print("File %s: nr of AC3 guesses = %s") %(file, sudoku2.get_nr_guesses())
+
         #
         # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
         # matrix3 = sudoku3.backtracking_search()
@@ -415,22 +414,39 @@ for file in os.listdir("sudokus/"):
         # print("File %s: nr of AC3 and MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
 
 
-        sudoku3 = Sudoku(matrix, ac3 = False, xwing=False, mvr = True, ac3J = False)
-        matrix3 = sudoku3.backtracking_search()
-        if(matrix3 is False):
-            print "False"
-        print("File %s: nr of MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
-
-        # sudoku3 = Sudoku(matrix, ac3=True, xwing=False, mvr=True, ac3J=True)
+        # sudoku3 = Sudoku(matrix, ac3 = False, xwing=False, mvr = True, ac3J = False)
         # matrix3 = sudoku3.backtracking_search()
-        # if (matrix3 is False):
+        # if(matrix3 is False):
         #     print "False"
-        # print("File %s: nr of AC3 and MRV and AC3J guesses = %s \n") % (file, sudoku3.get_nr_guesses())
+        # print("File %s: nr of MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
+
+        # sudoku4 = Sudoku(matrix, ac3=True, xwing=False, mvr=True, ac3J=True)
+        # matrix4 = sudoku4.backtracking_search()
+        # if (matrix4 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV and AC3J guesses = %s \n") % (file, sudoku4.get_nr_guesses())
 
 
 #print matrix
 
-#
+# File puz-001.txt: nr of AC3 guesses = 0
+# File puz-002.txt: nr of AC3 guesses = 0
+# File puz-010.txt: nr of AC3 guesses = 0
+# File puz-015.txt: nr of AC3 guesses = 0
+# File puz-025.txt: nr of AC3 guesses = 1
+# File puz-026.txt: nr of AC3 guesses = 21
+# File puz-048.txt: nr of AC3 guesses = 8
+# File puz-051.txt: nr of AC3 guesses = 10
+# File puz-062.txt: nr of AC3 guesses = 2
+# File puz-076.txt: nr of AC3 guesses = 6
+# File puz-081.txt: nr of AC3 guesses = 10
+# File puz-082.txt: nr of AC3 guesses = 5
+# File puz-090.txt: nr of AC3 guesses = 6
+# File puz-095.txt: nr of AC3 guesses = 11
+# File puz-099.txt: nr of AC3 guesses = 9
+# File puz-100.txt: nr of AC3 guesses = 9
+
+
 # File puz-001.txt: nr of guesses = 0
 #
 # File puz-001_solved.txt: nr of guesses = 0
