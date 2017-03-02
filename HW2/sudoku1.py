@@ -468,11 +468,11 @@ for file in os.listdir("sudokus/"):
         #     print "False"
         # print("File %s: nr of AC3 and MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
 
-        sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
-        matrix3 = sudoku3.backtracking_search()
-        if(matrix3 is False):
-            print "False"
-        print("File %s: nr of AC3 and MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
+        # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
+        # matrix3 = sudoku3.backtracking_search()
+        # if(matrix3 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
         #
         #
         #
