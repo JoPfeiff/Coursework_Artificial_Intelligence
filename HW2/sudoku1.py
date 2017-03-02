@@ -63,27 +63,41 @@ class Sudoku:
         arcs=self.get_arcs(matrix,domain_dict)
         while arcs:
             start_variable,end_variable=arcs.pop(0)
-            if self.revise(domain_dict, start_variable, end_variable):
+            if self.revise(domain_dict, matrix, start_variable, end_variable):
 
 
                 if not domain_dict[start_variable]:
                     return False
 
-                neighbors = self.get_neighbors(start_variable,domain_dict)
+                neighbors = self.getNeighbour(start_variable,domain_dict)
                 for neighbor in neighbors:
                      if end_variable != neighbor:
                         arcs.append((neighbor, start_variable))
         return domain_dict
 
-    def revise(self,domain_dict,start_variable,end_variable):
+    def revise(self,domain_dict, matrix,start_variable,end_variable):
         is_revised = False
-
+        #print(self.depth)
         for value in domain_dict[start_variable]:
+
+            # print matrix
+            # print value
+            # print start_variable
+            # print end_variable
+
             end_domain = domain_dict[end_variable]
 
-            if value not in end_domain:
+            if (value not in end_domain) and (matrix[str(end_variable[0]) + str(end_variable[1])] != value):
                 continue
             if len(end_domain)==1:
+                domain_dict[start_variable].remove(value)
+                is_revised = True
+
+            # print  matrix[str(end_domain[0]) + str(end_domain[1])]
+            # print value
+            # print ""
+            if (matrix[str(end_variable[0]) + str(end_variable[1])] == value):
+
                 domain_dict[start_variable].remove(value)
                 is_revised = True
 
@@ -95,13 +109,12 @@ class Sudoku:
         neighbors = []
         end_cells=[i for i in keys]
         for end_cell in end_cells:
-            if cell!=end_cell and isNeighbour(cell,end_cell):
+            if cell!=end_cell and self.isNeighbour(cell,end_cell):
                 neighbors.append(end_cell)
         return neighbors
 
 
     def isNeighbour(self,cell1,cell2):
-
         same_box_row = False
         same_box_column = False
         for box in self.b:
@@ -386,15 +399,15 @@ for file in os.listdir("sudokus/"):
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mvr = True)
-        matrix1 = sudoku1.backtracking_search()
-        print matrix1
-        print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
+        # sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mvr = False)
+        # matrix1 = sudoku1.backtracking_search()
+        # print matrix1
+        # print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
 
-        sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True)
+        sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = False)
         matrix2 = sudoku2.backtracking_search()
         print matrix2
-        print("File %s: nr of MRV guesses = %s\n") %(file, sudoku2.get_nr_guesses())
+        print("File %s: nr of AC3 guesses = %s\n") %(file, sudoku2.get_nr_guesses())
         # sudoku = Sudoku(matrix, ac3 = False, xwing=True, mvr = True)
         # sudoku.backtracking_search()
         # print("File %s: nr of XWING guesses = %s \n") %(file, sudoku.get_nr_guesses())
