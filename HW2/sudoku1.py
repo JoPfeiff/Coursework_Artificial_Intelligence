@@ -33,12 +33,13 @@ class Sudoku:
     b = [range(0,3), range(3,6), range(6,9)]
     D = range(1,10)
 
-    def __init__(self, matrix, ac3 = True, mvr = True, xwing = True, ac3J = True):
+    def __init__(self, matrix, ac3 = True, mvr = True, xwing = True, ac3J = True, naked_pair_inference=True):
 
         self.ac3 = ac3
         self.mvr = mvr
         self.xwing = xwing
         self.ac3J = ac3J
+        self.naked_pair_inference= naked_pair_inference
         self.matrix = matrix
         self.domain_dict = self.initialize_domain(self.matrix)
 
@@ -124,6 +125,57 @@ class Sudoku:
             return True
 
 
+    def get_naked_pairs(self,domain_dict):
+        pairs=[]
+
+        potential_naked_pairs=self.get_potential_naked_pairs(domain_dict)
+        for start_naked_pair in potential_naked_pairs:
+            for end_naked_pair in potential_naked_pairs:
+                if start_naked_pair==end_naked_pair:
+                    continue
+
+                if not self.isNeighbour(start_naked_pair,end_naked_pair):
+                    continue
+                start_naked_domain=domain_dict[start_naked_pair]
+                end_naked_domain=domain_dict[end_naked_pair]
+
+                if start_naked_domain!=end_naked_domain:
+                    continue
+
+                naked_pair=(start_naked_pair,end_naked_pair)
+                inverted_naked_pair=(end_naked_pair,start_naked_pair)
+
+                if naked_pair not in pairs and inverted_naked_pair not in pairs:
+                    pairs.append(naked_pair)
+        return pairs
+
+    def get_potential_naked_pairs(self,domain_dict):
+        potential_naked_pairs=[]
+        for i in domain_dict.keys():
+             potential_pair = domain_dict[i]
+             if len(potential_pair) == 2:
+                potential_naked_pairs.append(i)
+        return potential_naked_pairs
+
+    def naked_pairs(self, domain_dict, matrix):
+        pairs=self.get_naked_pairs(domain_dict)
+        for start_naked_pair, end_naked_pair in pairs:
+            naked_domain = domain_dict[start_naked_pair]
+
+            start_neighbors = self.getNeighbour(start_naked_pair,domain_dict)
+            end_neighbors = self.getNeighbour(end_naked_pair,domain_dict)
+            neighbors = list(set(start_neighbors) & set(end_neighbors))
+
+            for x in neighbors:
+                neighbor_domain=domain_dict[x]
+                for value in naked_domain:
+                    if value in neighbor_domain:
+                        neighbor_domain.remove(value)
+                        if not neighbor_domain:
+                             return False
+        return domain_dict
+
+
 
     def initialize_domain(self, matrix):
         domain_dict = {}
@@ -170,6 +222,11 @@ class Sudoku:
             domain_dict = self.x_wing(domain_dict, matrix)
             if domain_dict is False:
                 return False
+        if self.naked_pair_inference:
+            domain_dict=self.naked_pairs(domain_dict,matrix)
+            if domain_dict is False:
+                return False
+
         return domain_dict
 
     def backtracking_search(self):
@@ -392,18 +449,24 @@ for file in os.listdir("sudokus/"):
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mvr = False, ac3J = False)
+        sudoku1 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True, ac3J = True, naked_pair_inference=False)
         matrix1 = sudoku1.backtracking_search()
         if(matrix1 is False):
             print "False"
         print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
 
-        sudoku2 = Sudoku(matrix, ac3 = False, xwing=False, mvr = True,  ac3J = False)
+        sudoku2 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True,  ac3J = True, naked_pair_inference=True)
         matrix2 = sudoku2.backtracking_search()
         if(matrix2 is False):
             print "False"
         print("File %s: nr of MRV guesses = %s") %(file, sudoku2.get_nr_guesses())
 
+        #
+        # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
+        # matrix3 = sudoku3.backtracking_search()
+        # if(matrix3 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
 
         sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
         matrix3 = sudoku3.backtracking_search()
