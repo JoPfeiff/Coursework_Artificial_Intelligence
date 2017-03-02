@@ -33,11 +33,12 @@ class Sudoku:
     b = [range(0,3), range(3,6), range(6,9)]
     D = range(1,10)
 
-    def __init__(self, matrix, ac3 = True, mvr = True, xwing = True):
+    def __init__(self, matrix, ac3 = True, mvr = True, xwing = True, ac3J = True):
 
         self.ac3 = ac3
         self.mvr = mvr
         self.xwing = xwing
+        self.ac3J = ac3J
         self.matrix = matrix
         self.domain_dict = self.initialize_domain(self.matrix)
 
@@ -168,6 +169,8 @@ class Sudoku:
             # print "    "
             # print "after",domain_dict
             # print "    "
+        if self.ac3J:
+            domain_dict = self.ac3_algo(matrix, domain_dict)
         if self.xwing:
             domain_dict = self.x_wing(domain_dict, matrix)
         return domain_dict
@@ -184,19 +187,12 @@ class Sudoku:
             min_length = float('inf')
             best = None
             for key, value in sorted(domain_dict.items()):
-                if matrix[key] != 0:
+                if matrix[key[0],key[1]] != 0:
                     continue 
-                
-                # print 'Key', key
 
                 length=0
                 for i in value:
                     length += int(self.check_constrainst(int(key[0]), int(key[1]), i, matrix))
-
-                # print '    ', length, min_length
-
-                # if length == 0:
-                #     continue
 
                 if length < min_length:
                     min_length = length
@@ -394,24 +390,43 @@ class Sudoku:
 # print(matrix)
 # print("File %s: nr of MRV guesses = %s\n") %(file, sudoku.get_nr_guesses())
 for file in os.listdir("sudokus/"):
-    if file.endswith("26.txt"):
+    if file.endswith(".txt"):
         #file = "sudokus/puz-001.txt"
 
         matrix = read_file("sudokus/"+file)
 
-        # sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mvr = False)
+        # sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mvr = False, ac3J = False)
         # matrix1 = sudoku1.backtracking_search()
-        # print matrix1
+        # if(matrix1 is False):
+        #     print "False"
         # print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
 
-        sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = False)
-        matrix2 = sudoku2.backtracking_search()
-        print matrix2
-        print("File %s: nr of AC3 guesses = %s\n") %(file, sudoku2.get_nr_guesses())
-        # sudoku = Sudoku(matrix, ac3 = False, xwing=True, mvr = True)
-        # sudoku.backtracking_search()
-        # print("File %s: nr of XWING guesses = %s \n") %(file, sudoku.get_nr_guesses())
-        # print sudoku.get_nr_guesses()
+        # sudoku2 = Sudoku(matrix, ac3 = True, xwing=False, mvr = False,  ac3J = False)
+        # matrix2 = sudoku2.backtracking_search()
+        # if(matrix2 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 guesses = %s") %(file, sudoku2.get_nr_guesses())
+        #
+        #
+        # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
+        # matrix3 = sudoku3.backtracking_search()
+        # if(matrix3 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
+
+
+        sudoku3 = Sudoku(matrix, ac3 = False, xwing=False, mvr = True, ac3J = False)
+        matrix3 = sudoku3.backtracking_search()
+        if(matrix3 is False):
+            print "False"
+        print("File %s: nr of MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
+
+        # sudoku3 = Sudoku(matrix, ac3=True, xwing=False, mvr=True, ac3J=True)
+        # matrix3 = sudoku3.backtracking_search()
+        # if (matrix3 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV and AC3J guesses = %s \n") % (file, sudoku3.get_nr_guesses())
+
 
 #print matrix
 
