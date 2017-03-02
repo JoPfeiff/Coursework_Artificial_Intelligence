@@ -449,17 +449,17 @@ for file in os.listdir("sudokus/"):
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku1 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True, ac3J = True, naked_pair_inference=False)
-        matrix1 = sudoku1.backtracking_search()
-        if(matrix1 is False):
-            print "False"
-        print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
-
-        sudoku2 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True,  ac3J = True, naked_pair_inference=True)
-        matrix2 = sudoku2.backtracking_search()
-        if(matrix2 is False):
-            print "False"
-        print("File %s: nr of MRV guesses = %s") %(file, sudoku2.get_nr_guesses())
+        # sudoku1 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True, ac3J = True, naked_pair_inference=False)
+        # matrix1 = sudoku1.backtracking_search()
+        # if(matrix1 is False):
+        #     print "False"
+        # print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
+        #
+        # sudoku2 = Sudoku(matrix, ac3 = True, xwing=True, mvr = True,  ac3J = True, naked_pair_inference=True)
+        # matrix2 = sudoku2.backtracking_search()
+        # if(matrix2 is False):
+        #     print "False"
+        # print("File %s: nr of MRV guesses = %s") %(file, sudoku2.get_nr_guesses())
 
         #
         # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mvr = True, ac3J = False)
