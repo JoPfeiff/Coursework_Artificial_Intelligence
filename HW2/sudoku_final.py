@@ -424,52 +424,52 @@ for file in os.listdir("sudokus/"):
 
         matrix = read_file("sudokus/"+file)
 
-        sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mrv = False, custom_inference = False, naked_pair_inference=False)
-        matrix1 = sudoku1.backtracking_search()
-        if(matrix1 is False):
-            print "False"
-        print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
-
-        sudoku2 = Sudoku(matrix, ac3 = False, xwing=False, mrv = True,  custom_inference = False, naked_pair_inference=False)
-        matrix2 = sudoku2.backtracking_search()
-        if(matrix2 is False):
-            print "False"
-        print("File %s: nr of MRV guesses = %s") %(file, sudoku2.get_nr_guesses())
-
-        
-        sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mrv = False, custom_inference = False,naked_pair_inference=False)
-        matrix3 = sudoku3.backtracking_search()
-        if(matrix3 is False):
-            print "False"
-        print("File %s: nr of AC3 w/o MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
-
-        sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mrv = True, custom_inference = False,naked_pair_inference=False)
-        matrix3 = sudoku3.backtracking_search()
-        if(matrix3 is False):
-            print "False"
-        print("File %s: nr of AC3 w/ MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
-        
-        
-        
-        sudoku4 = Sudoku(matrix, ac3=True, xwing=False, mrv=True, custom_inference=True,naked_pair_inference=False)
-        matrix4 = sudoku4.backtracking_search()
-        if (matrix4 is False):
-            print "False"
-        print("File %s: nr of AC3 and MRV and custom_inference guesses = %s") % (file, sudoku4.get_nr_guesses())
-        
-        sudoku5 = Sudoku(matrix, ac3=True, xwing=True, mrv=True, custom_inference=True,naked_pair_inference=False)
-        matrix5 = sudoku5.backtracking_search()
-        if (matrix5 is False):
-            print "False"
-        print("File %s: nr of AC3 and MRV and custom_inference and XWing guesses = %s") % (file, sudoku5.get_nr_guesses())
-
-        sudoku6 = Sudoku(matrix, ac3=True, xwing=True, mrv=True, custom_inference=True,naked_pair_inference=True)
-        matrix6 = sudoku6.backtracking_search()
-        if (matrix6 is False):
-            print "False"
-        print("File %s: nr of AC3 and MRV and custom_inference and XWing and naked pairs guesses = %s") % (file, sudoku6.get_nr_guesses())
-
-        print " "
+        # sudoku1 = Sudoku(matrix, ac3 = False, xwing=False, mrv = False, custom_inference = False, naked_pair_inference=False)
+        # matrix1 = sudoku1.backtracking_search()
+        # if(matrix1 is False):
+        #     print "False"
+        # print("File %s: nr of Naive guesses = %s") %(file, sudoku1.get_nr_guesses())
+        #
+        # sudoku2 = Sudoku(matrix, ac3 = False, xwing=False, mrv = True,  custom_inference = False, naked_pair_inference=False)
+        # matrix2 = sudoku2.backtracking_search()
+        # if(matrix2 is False):
+        #     print "False"
+        # print("File %s: nr of MRV guesses = %s") %(file, sudoku2.get_nr_guesses())
+        #
+        #
+        # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mrv = False, custom_inference = False,naked_pair_inference=False)
+        # matrix3 = sudoku3.backtracking_search()
+        # if(matrix3 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 w/o MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
+        #
+        # sudoku3 = Sudoku(matrix, ac3 = True, xwing=False, mrv = True, custom_inference = False,naked_pair_inference=False)
+        # matrix3 = sudoku3.backtracking_search()
+        # if(matrix3 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 w/ MRV guesses = %s ") %(file, sudoku3.get_nr_guesses())
+        #
+        #
+        #
+        # sudoku4 = Sudoku(matrix, ac3=True, xwing=False, mrv=True, custom_inference=True,naked_pair_inference=False)
+        # matrix4 = sudoku4.backtracking_search()
+        # if (matrix4 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV and custom_inference guesses = %s") % (file, sudoku4.get_nr_guesses())
+        #
+        # sudoku5 = Sudoku(matrix, ac3=True, xwing=True, mrv=True, custom_inference=True,naked_pair_inference=False)
+        # matrix5 = sudoku5.backtracking_search()
+        # if (matrix5 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV and custom_inference and XWing guesses = %s") % (file, sudoku5.get_nr_guesses())
+        #
+        # sudoku6 = Sudoku(matrix, ac3=True, xwing=True, mrv=True, custom_inference=True,naked_pair_inference=True)
+        # matrix6 = sudoku6.backtracking_search()
+        # if (matrix6 is False):
+        #     print "False"
+        # print("File %s: nr of AC3 and MRV and custom_inference and XWing and naked pairs guesses = %s") % (file, sudoku6.get_nr_guesses())
+        #
+        # print " "
 
         # print("")
 #print matrix
